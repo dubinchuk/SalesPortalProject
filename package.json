@@ -1,0 +1,70 @@
+{
+  "name": "salesportalproject",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Sales Portal test automation project",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "npx playwright test",
+    "test-clean": "npm run clean-results && npm run test",
+    "ui-mode": "npx playwright test --ui",
+    "ui-mode-clean": "npm run clean-results && npx playwright test --ui",
+    "clean-results": "rimraf allure-results test-results playwright-report",
+    "report-html-open": "npx playwright show-report",
+    "report-create": "allure generate allure-results -o allure-report --clean",
+    "report-open": "npm run report-create && allure open allure-report",
+    "prettier": "prettier --config .prettierrc src/**/*.ts --check",
+    "prettier-fix": "prettier --config .prettierrc src/**/*.ts --write",
+    "lint": "eslint . --ext .ts",
+    "lint-fix": "eslint . --ext .ts --fix",
+    "typecheck": "npx tsc --noEmit",
+    "prepare": "husky",
+    "build": "rimraf dist && npx tsc"
+  },
+  "keywords": [
+    "typescript",
+    "aqa",
+    "playwright"
+  ],
+  "author": "Evgeny Dubinchuk",
+  "license": "ISC",
+  "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "@eslint/js": "^9.29.0",
+    "@faker-js/faker": "^9.8.0",
+    "@playwright/test": "^1.53.0",
+    "@types/axios": "^0.9.36",
+    "@types/lodash": "^4.17.17",
+    "@types/node": "^22.15.31",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
+    "ajv": "^8.17.1",
+    "allure-commandline": "^2.34.0",
+    "allure-playwright": "^3.2.2",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
+    "eslint": "^9.29.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-prettier": "^5.4.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "lodash": "^4.17.21",
+    "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.8.3"
+  },
+  "lint-staged": {
+    "**/*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "**/*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "dependencies": {
+    "axios": "^1.10.0"
+  }
+}
