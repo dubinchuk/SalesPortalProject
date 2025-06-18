@@ -15,7 +15,7 @@ dotenv.config();
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: './src/ui/tests',
+  testDir: process.env.TESTS === 'ui' ? './src/ui/tests' : './src/api/tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -47,9 +47,24 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'], headless: false },
+      name: 'ui',
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: true,
+        storageState: 'src/.auth/user.json',
+      },
+      dependencies: ['setup'],
+      testMatch: /.*\.spec\.ts/,
+    },
+    {
+      name: 'api',
+      testMatch: /.*\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+        headless: true,
+      },
     },
 
     // {
