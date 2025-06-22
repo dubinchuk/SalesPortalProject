@@ -1,5 +1,6 @@
 import { test as setup } from '../../../fixtures/services.fixtures';
 import signInApiService from '../../../api/services/signIn.api';
+import { BASE_URL } from '../../../config/environment';
 
 const authFile = 'src/.auth/user.json';
 
@@ -9,7 +10,7 @@ setup('Should login with valid credentials', async ({ page, request }) => {
     {
       name: 'Authorization',
       value: token,
-      url: 'https://anatoly-karpovich.github.io/aqa-course-project/',
+      url: BASE_URL,
     },
   ]);
 
