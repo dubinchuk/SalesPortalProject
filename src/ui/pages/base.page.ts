@@ -66,6 +66,10 @@ export class BasePage {
     await this.page.goto(url);
   }
 
+  async deleteCookies() {
+    await this.page.context().clearCookies();
+  }
+
   async interceptResponse<T>(
     url: string,
     triggerAction: () => Promise<void>,

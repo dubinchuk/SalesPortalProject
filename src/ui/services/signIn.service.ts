@@ -35,4 +35,8 @@ export class SignInService {
   async fillInputs(credentials: IUserCredentials) {
     await this.signInPage.fillCredentialsInputs(credentials);
   }
+
+  async clearCookies() {
+    await this.signInPage.deleteCookies();
+  }
 }
