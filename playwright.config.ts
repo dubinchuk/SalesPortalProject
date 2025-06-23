@@ -16,6 +16,7 @@ dotenv.config();
  */
 export default defineConfig({
   testDir: process.env.TESTS === 'ui' ? './src/ui/tests' : './src/api/tests',
+  globalSetup: './src/config/global-setup.ts',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -48,7 +49,6 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
-    { name: 'setup', testMatch: /.*\.setup\.ts/ },
     {
       name: 'ui',
       use: {
@@ -56,7 +56,6 @@ export default defineConfig({
         headless: false,
         storageState: 'src/.auth/user.json',
       },
-      dependencies: ['setup'],
       testMatch: /.*\.spec\.ts/,
     },
     {
