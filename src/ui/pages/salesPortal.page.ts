@@ -4,7 +4,7 @@ export abstract class SalesPortalPage extends BasePage {
   protected readonly spinner = this.findElement('div.spinner-border');
   abstract readonly uniqueElement: string;
   private readonly 'Toast message' = '.toast-body';
-  private readonly 'Close toast button' = '.d-flex .btn-close';
+  private readonly 'Close toast button' = '//button[@title="Close"]';
 
   async waitForOpened() {
     await this.waitForElement(this.uniqueElement);

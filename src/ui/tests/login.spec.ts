@@ -2,7 +2,7 @@ import { test } from '@playwright/test';
 
 import { ADMIN_PASSWORD, ADMIN_USERNAME, BASE_URL } from '../../config/environment';
 
-test.describe.only('[UI] [Login]', async function () {
+test.describe('[UI] [Login]', async function () {
   test.beforeEach(async function ({ page }) {
     await page.context().clearCookies();
     await page.goto(BASE_URL);
@@ -18,12 +18,12 @@ test.describe.only('[UI] [Login]', async function () {
     await page.locator('div.spinner-border').waitFor({ state: 'hidden', timeout: 10000 });
   });
 
-  test.only('Open Customers list page', async function ({ page }) {
+  test('Open Customers list page', async function ({ page }) {
     await page.getByLabel('Email address').fill(ADMIN_USERNAME);
     await page.getByPlaceholder('Enter password').fill(ADMIN_PASSWORD);
     await page.getByText('Login', { exact: true }).click();
     await page.locator('div.spinner-border').waitFor({ state: 'hidden', timeout: 10000 });
-    await page.getByRole('listitem').filter({ hasText: 'Customers' }).click();
+    await page.getByRole('link', { name: 'View Customers' }).click();
     await page.locator('div.spinner-border').waitFor({ state: 'hidden', timeout: 10000 });
   });
 });

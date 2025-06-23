@@ -20,8 +20,8 @@ test.describe('[UI] [Customers] Smoke', async function () {
     await homePageService.openCustomersPage();
     await customersPageService.openAddNewCustomerPage();
     const response = await addNewCustomerPageService.create();
-    await customersPageService.validateCustomerCreatedMessage();
     customersIdsToDelete.push(response.body.Customer._id);
+    await customersPageService.validateCustomerCreatedMessage();
     //TODO: check customer in table
   });
 });
