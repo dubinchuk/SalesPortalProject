@@ -1,12 +1,15 @@
 import { test } from '../../../fixtures/services.fixtures';
 
 test.describe('[UI] [Customers] Smoke', async function () {
+  let customersIdsToDelete: string[] = [];
+
   test.beforeEach(async function ({ signInPageService }) {
     await signInPageService.openSalesPortal();
   });
 
-  test.afterEach(async function ({ page }) {
-    //TODO: delete customer
+  test.afterEach(async function ({ customersApiService }) {
+    await customersApiService.deleteCustomers(customersIdsToDelete);
+    customersIdsToDelete = [];
   });
 
   test('Create customer with valid data', async function ({
@@ -16,7 +19,8 @@ test.describe('[UI] [Customers] Smoke', async function () {
   }) {
     await homePageService.openCustomersPage();
     await customersPageService.openAddNewCustomerPage();
-    await addNewCustomerPageService.create();
+    const response = await addNewCustomerPageService.create();
+    customersIdsToDelete.push(response.body.Customer._id);
     await customersPageService.validateCustomerCreatedMessage();
     //TODO: check customer in table
   });

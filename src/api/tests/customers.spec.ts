@@ -1,22 +1,21 @@
-import { expect, test } from '@playwright/test';
-import _ from 'lodash';
+import { test } from '@playwright/test';
 
 import signInApiService from '../services/signIn.api';
 import { generateNewCustomer } from '../../data/customers/generateCustomer';
-import customerApiClient from '../clients/customers.client';
-import { STATUS_CODES } from '../../data/types/api.types';
+import customersApiService from '../services/customers.service';
 
 test.describe('[API] [Customers]', async function () {
+  let customersIdsToDelete: string[] = [];
+
+  test.afterEach(async function () {
+    await customersApiService.deleteCustomers(customersIdsToDelete);
+    customersIdsToDelete = [];
+  });
+
   test('Create customer with valid data', async function () {
     await signInApiService.loginAsAdmin();
-    const customerData = generateNewCustomer();
-    const response = await customerApiClient.create(
-      customerData,
-      await signInApiService.getToken(),
-    );
-    expect(response.status).toBe(STATUS_CODES.CREATED);
-    expect(response.body.IsSuccess).toBe(true);
-    expect(response.body.ErrorMessage).toBe(null);
-    expect(_.omit(response.body.Customer, ['_id', 'createdOn'])).toMatchObject({ ...customerData });
+    const customer = generateNewCustomer();
+    const response = await customersApiService.create(customer);
+    customersIdsToDelete.push(response.body.Customer._id);
   });
 });

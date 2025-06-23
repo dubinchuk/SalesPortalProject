@@ -45,6 +45,7 @@ export class AddCustomerService {
     });
     await this.addNewCustomerPage.waitForSpinnerToHide();
     await this.customersPage.waitForOpened();
+    return response;
   }
 
   @logStep()

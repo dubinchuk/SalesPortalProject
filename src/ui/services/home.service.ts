@@ -2,6 +2,7 @@ import { Page } from '@playwright/test';
 
 import { HomePage } from '../pages/home.page.js';
 import { CustomersListPage } from '../pages/customers/customers.page.js';
+import { BASE_URL } from '../../config/environment.js';
 
 export class HomeService {
   private homePage: HomePage;
@@ -18,7 +19,7 @@ export class HomeService {
   }
 
   async openHomePage() {
-    await this.homePage.openPage('https://anatoly-karpovich.github.io/aqa-course-project');
+    await this.homePage.openPage(BASE_URL);
     await this.homePage.waitForOpened();
   }
 }

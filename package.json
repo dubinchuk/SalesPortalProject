@@ -5,8 +5,8 @@
   "description": "Sales Portal test automation project",
   "main": "dist/index.js",
   "scripts": {
-    "test:ui": "cross-env TESTS=ui npx playwright test --project=ui",
-    "test:api": "cross-env TESTS=api npx playwright test --project=api",
+    "test:ui": "npm run clean-results && cross-env TESTS=ui npx playwright test --project=ui",
+    "test:api": "npm run clean-results && cross-env TESTS=api npx playwright test --project=api",
     "ui-mode": "npm run clean-results && cross-env TESTS=ui npx playwright test --ui",
     "ui-mode-clean": "npm run clean-results && npx playwright test --ui",
     "clean-results": "rimraf allure-results test-results playwright-report",

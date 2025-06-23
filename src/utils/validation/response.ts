@@ -17,8 +17,8 @@ export function validateSchema<T = object>(response: IResponse<T>, schema: objec
 export function validateResponse<T extends object>(
   response: IResponse<T>,
   status: number,
-  IsSuccess: boolean,
-  ErrorMessage: null | string,
+  IsSuccess?: boolean,
+  ErrorMessage?: null | string,
 ) {
   expect(response.status).toBe(status);
   if (isResponseWithIsSuccessAndErrorMessage(response)) {

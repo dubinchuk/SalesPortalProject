@@ -16,6 +16,28 @@ class CustomerApiClient {
       },
     });
   }
+
+  async delete(id: string, token: string) {
+    return await this.request.send<ICustomerResponse>({
+      url: apiConfig.endpoints.Customers + `/${id}`,
+      method: 'delete',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: token,
+      },
+    });
+  }
+
+  async get(id: string, token: string) {
+    return await this.request.send<ICustomerResponse>({
+      url: apiConfig.endpoints.Customers + `/${id}`,
+      method: 'get',
+      headers: {
+        'content-type': 'application/json',
+        Authorization: token,
+      },
+    });
+  }
 }
 
 export default new CustomerApiClient();
