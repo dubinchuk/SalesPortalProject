@@ -4,7 +4,7 @@ import { BASE_URL } from '../../../config/environment';
 
 const authFile = 'src/.auth/user.json';
 
-setup('Should login with valid credentials', async ({ page, request }) => {
+setup('Should login with valid credentials', async ({ page }) => {
   const token = await signInApiService.loginAsAdmin();
   await page.context().addCookies([
     {

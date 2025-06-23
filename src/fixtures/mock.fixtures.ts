@@ -7,13 +7,7 @@ export class Mock {
   constructor(private page: Page) {}
 
   public async modifyReponse<T>(url: string | RegExp, body: T, status: STATUS_CODES) {
-    await this.page.route(url, async (route, request) => {
-      // Can be filtered, for example by method like below:
-      //
-      // if(request.method() === 'POST') {
-      //     await route.continue()
-      //     return
-      // }
+    await this.page.route(url, async (route) => {
       await route.fulfill({
         json: body,
         status,

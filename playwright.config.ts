@@ -26,7 +26,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [
-    ['html'],
+    ['html', { open: 'never' }],
     [
       'allure-playwright',
       {
@@ -43,6 +43,7 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
   },
 
   /* Configure projects for major browsers */
@@ -52,7 +53,7 @@ export default defineConfig({
       name: 'ui',
       use: {
         ...devices['Desktop Chrome'],
-        headless: true,
+        headless: false,
         storageState: 'src/.auth/user.json',
       },
       dependencies: ['setup'],
@@ -63,7 +64,6 @@ export default defineConfig({
       testMatch: /.*\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        headless: true,
       },
     },
 
