@@ -43,8 +43,9 @@ export class AddCustomerService {
       createdOn: response.body.Customer.createdOn,
       _id: response.body.Customer._id,
     });
-    await this.addNewCustomerPage.waitForSpinnerToHide();
+    await this.addNewCustomerPage.waitForButtonSpinnerToHide();
     await this.customersPage.waitForOpened();
+    await this.customersPage.waitForTableSpinnerToHide();
     return response;
   }
 

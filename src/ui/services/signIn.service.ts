@@ -23,8 +23,9 @@ export class SignInService {
   async login(credentials: IUserCredentials) {
     await this.signInPage.fillCredentialsInputs(credentials);
     await this.signInPage.clickSubmitButton();
-    await this.signInPage.waitForSpinnerToHide();
+    await this.signInPage.waitForButtonSpinnerToHide();
     await this.homePage.waitForOpened();
+    await this.homePage.waitForHomeSpinnersToHide();
   }
 
   @logStep()
@@ -34,5 +35,9 @@ export class SignInService {
 
   async fillInputs(credentials: IUserCredentials) {
     await this.signInPage.fillCredentialsInputs(credentials);
+  }
+
+  async clearCookies() {
+    await this.signInPage.deleteCookies();
   }
 }

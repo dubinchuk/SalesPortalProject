@@ -29,14 +29,13 @@ export class CustomersListService {
 
   async openAddNewCustomerPage() {
     await this.customersPage.clickOnAddNewCustomer();
-    await this.customersPage.waitForSpinnerToHide();
     await this.addNewCustomerPage.waitForOpened();
   }
 
   private async repeatSortAction(action: () => Promise<void>, clickCount: number = 1) {
     for (let i = 0; i < clickCount; i++) {
       await action();
-      await this.customersPage.waitForSpinnerToHide();
+      await this.customersPage.waitForTableSpinnerToHide();
     }
   }
 

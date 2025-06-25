@@ -32,7 +32,7 @@ export class CustomersApiService {
       try {
         await this.delete(id);
       } catch (error) {
-        throw new Error(`Failed to delete customer with id ${id}`);
+        throw new Error(`Failed to delete customer with id ${id}: ${error}`);
       }
     }
   }

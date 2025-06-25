@@ -8,7 +8,8 @@ test.describe('[UI] [Customers] Smoke', async function () {
   });
 
   test.afterEach(async function ({ customersApiService }) {
-    await customersApiService.deleteCustomers(customersIdsToDelete);
+    if (customersIdsToDelete.length > 0)
+      await customersApiService.deleteCustomers(customersIdsToDelete);
     customersIdsToDelete = [];
   });
 
