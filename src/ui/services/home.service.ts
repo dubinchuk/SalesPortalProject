@@ -14,7 +14,7 @@ export class HomeService {
 
   async openCustomersPage() {
     await this.homePage.clickOnViewDetailsButton('Customers');
-    await this.homePage.waitForSpinnerToHide();
+    await this.homePage.waitForTableSpinnerToHide();
     await this.customersPage.waitForOpened();
   }
 

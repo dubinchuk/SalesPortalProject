@@ -1,17 +1,22 @@
 import { BasePage } from './base.page.js';
 
 export abstract class SalesPortalPage extends BasePage {
-  protected readonly spinner = this.findElement('div.spinner-border');
   abstract readonly uniqueElement: string;
-  private readonly 'Toast message' = '.toast-body';
-  private readonly 'Close toast button' = '//button[@title="Close"]';
+  private readonly 'Toast message' = this.findElement('.toast-body');
+  private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
+  private readonly 'Button Spinner' = this.findElement('button .spinner-border');
+  private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
 
   async waitForOpened() {
     await this.waitForElement(this.uniqueElement);
   }
 
-  async waitForSpinnerToHide() {
-    await this.waitForElement(this.spinner, 'hidden', 15000);
+  async waitForButtonSpinnerToHide() {
+    await this.waitForSpinnerToHide(this['Button Spinner']);
+  }
+
+  async waitForTableSpinnerToHide() {
+    await this.waitForSpinnerToHide(this['Table spinner']);
   }
 
   async getToastMessage() {

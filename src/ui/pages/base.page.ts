@@ -1,4 +1,5 @@
 import { Locator, Page } from '@playwright/test';
+import { faker } from '@faker-js/faker';
 
 import { IResponse } from '../../data/types/api.types';
 
@@ -31,6 +32,35 @@ export class BasePage {
     const element = await this.waitForElement(locator, 'visible');
     await element.scrollIntoViewIfNeeded({ timeout });
     return element;
+  }
+
+  protected async waitForSpinnerToHide(
+    spinnerOrSpinners: LocatorOrSelector | LocatorOrSelector[],
+    skipVisibilityCheck: boolean = true,
+  ) {
+    const spinners = Array.isArray(spinnerOrSpinners) ? spinnerOrSpinners : [spinnerOrSpinners];
+    const randomIndex = faker.number.int(spinners.length - 1);
+
+    // Оставляем возможность проверки видимости спиннера
+    if (!skipVisibilityCheck) {
+      try {
+        await this.waitForElement(spinners[randomIndex], 'visible', 3000);
+      } catch (error) {
+        if (spinners.length > 1) {
+          throw new Error(`Random spinner at index ${randomIndex} was not visible: ${error}`);
+        } else {
+          throw new Error(`Spinner was not visible: ${error}`);
+        }
+      }
+    }
+
+    try {
+      for (const spinner of spinners) {
+        await this.waitForElement(spinner, 'hidden');
+      }
+    } catch (error) {
+      throw new Error(`Failed waiting spinner(s) to hide: ${error}`);
+    }
   }
 
   protected async click(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {
