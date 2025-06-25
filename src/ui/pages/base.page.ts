@@ -64,7 +64,7 @@ export class BasePage {
   }
 
   protected async click(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {
-    const element = await this.waitForElementAndScroll(locator, timeout);
+    const element = await this.waitForElement(locator, 'visible', timeout);
     await element.isEnabled();
     await element.click();
   }
@@ -74,7 +74,7 @@ export class BasePage {
     value: string | number,
     timeout = DEFAULT_TIMEOUT,
   ) {
-    const element = await this.waitForElementAndScroll(locator, timeout);
+    const element = await this.waitForElement(locator, 'visible', timeout);
     await element.fill(String(value), { timeout });
   }
 
@@ -88,7 +88,7 @@ export class BasePage {
     value: string | number,
     timeout = DEFAULT_TIMEOUT,
   ) {
-    const element = await this.waitForElementAndScroll(dropdownLocator, timeout);
+    const element = await this.waitForElement(dropdownLocator, 'visible', timeout);
     await element.selectOption(String(value), { timeout });
   }
 
