@@ -4,7 +4,7 @@ import { ADMIN_PASSWORD, ADMIN_USERNAME, BASE_URL } from '../../config/environme
 import { IUserCredentials } from '../../data/types/user.types.js';
 import { HomePage } from '../pages/home.page.js';
 import { SignInPage } from '../pages/login.page.js';
-import { logStep } from '../../utils/report/logStep.js';
+import { logStep } from '../../utils/report/decorator.js';
 
 export class SignInService {
   private signInPage: SignInPage;
@@ -14,12 +14,12 @@ export class SignInService {
     this.homePage = new HomePage(page);
   }
 
-  @logStep()
+  @logStep('Open Sales Portal')
   async openSalesPortal() {
     await this.signInPage.openPage(BASE_URL);
   }
 
-  @logStep()
+  @logStep('Login')
   async login(credentials: IUserCredentials) {
     await this.signInPage.fillCredentialsInputs(credentials);
     await this.signInPage.clickSubmitButton();
@@ -28,7 +28,7 @@ export class SignInService {
     await this.homePage.waitForHomeSpinnersToHide();
   }
 
-  @logStep()
+  @logStep('Login as Admin')
   async loginAsAdmin() {
     await this.login({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
   }
@@ -37,6 +37,7 @@ export class SignInService {
     await this.signInPage.fillCredentialsInputs(credentials);
   }
 
+  @logStep('Clear cookies')
   async clearCookies() {
     await this.signInPage.deleteCookies();
   }

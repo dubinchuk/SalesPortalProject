@@ -10,7 +10,7 @@ import {
 import { TABLE_MESSAGES } from '../../../data/customers/customersList.js';
 import { TOAST_MESSAGES } from '../../../data/messages/messages.js';
 import { validateToastMessage } from '../../../utils/validation/toastMessage.js';
-import { logStep } from '../../../utils/report/logStep.js';
+import { logStep } from '../../../utils/report/decorator.js';
 
 export class CustomersListService {
   private customersPage: CustomersListPage;
@@ -27,6 +27,7 @@ export class CustomersListService {
     [CUSTOMERS_COLUMN_NAME.CREATED_ON]: 'createdOn',
   };
 
+  @logStep('Open Add New Customer Page')
   async openAddNewCustomerPage() {
     await this.customersPage.clickOnAddNewCustomer();
     await this.addNewCustomerPage.waitForOpened();
@@ -39,7 +40,7 @@ export class CustomersListService {
     }
   }
 
-  @logStep()
+  @logStep('Click on column')
   private async clickToSortColumn(column: CUSTOMERS_COLUMN_NAME, direction: 'asc' | 'desc') {
     let clickCount: 1 | 2;
     direction === 'asc' ? (clickCount = 1) : (clickCount = 2);
@@ -49,7 +50,7 @@ export class CustomersListService {
     );
   }
 
-  @logStep()
+  @logStep('Get all customers via UI')
   private async getAllCustomersUI() {
     const data = await this.customersPage.getCustomersColumns();
     const customers: ICustomersTable[] = [];
@@ -87,7 +88,7 @@ export class CustomersListService {
     return customers;
   }
 
-  @logStep()
+  @logStep('Sort customers and verify')
   async sortCustomersAndVerify(column: CUSTOMERS_COLUMN_NAME, direction: 'asc' | 'desc') {
     const key = this.columnKeyMap[column];
     const expectedData = await this.sortCustomersArray(key, direction);
@@ -97,18 +98,18 @@ export class CustomersListService {
     expect(actualData).toEqual(expectedData);
   }
 
-  @logStep()
+  @logStep('Validate toast message and close')
   async validateToastMessageAndClose(expectedMessage: string) {
     await validateToastMessage(this.customersPage, expectedMessage);
     await this.customersPage.closeToastMessage();
   }
 
-  @logStep()
+  @logStep('Validate custommer created message')
   async validateCustomerCreatedMessage() {
     await this.validateToastMessageAndClose(TOAST_MESSAGES.CUSTOMER.CREATED);
   }
 
-  @logStep()
+  @logStep('Validate empty table')
   async validateEmptyTable(message?: string) {
     const actualMessage = await this.customersPage.getEmptyTableMessage();
     expect(actualMessage).toEqual(message ?? TABLE_MESSAGES.EMPTY_TABLE);

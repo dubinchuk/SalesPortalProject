@@ -6,12 +6,14 @@ import { STATUS_CODES } from '../../data/types/api.types';
 import { ICustomer } from '../../data/types/customers.types';
 import { validateResponse } from '../../utils/validation/response';
 import customersApiClient from '../clients/customers.client';
+import { logStep } from '../../utils/report/decorator';
 
 import signInApi from './signIn.api';
 
 export class CustomersApiService {
   constructor(private customersClient = customersApiClient) {}
 
+  @logStep('Create customer via API')
   async create(customerData?: Partial<ICustomer>) {
     const response = await this.customersClient.create(
       generateNewCustomer(customerData),
@@ -27,6 +29,7 @@ export class CustomersApiService {
     validateResponse(response, STATUS_CODES.DELETED);
   }
 
+  @logStep('Delete customers via API')
   async deleteCustomers(customersIdsToDelete: string[]) {
     for (const id of customersIdsToDelete) {
       try {

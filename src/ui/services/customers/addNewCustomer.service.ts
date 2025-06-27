@@ -9,7 +9,7 @@ import { validateResponse } from '../../../utils/validation/response.js';
 import { STATUS_CODES } from '../../../data/types/api.types.js';
 import { validateToastMessage } from '../../../utils/validation/toastMessage.js';
 import { TOAST_MESSAGES } from '../../../data/messages/messages.js';
-import { logStep } from '../../../utils/report/logStep.js';
+import { logStep } from '../../../utils/report/decorator.js';
 
 export class AddCustomerService {
   private customersPage: CustomersListPage;
@@ -28,7 +28,7 @@ export class AddCustomerService {
     await this.addNewCustomerPage.clickOnSaveButton();
   }
 
-  @logStep()
+  @logStep('Create customer')
   async create(customer?: ICustomer) {
     const customerData = customer ?? generateNewCustomer();
     await this.fillCustomerInputs(customerData);
@@ -49,7 +49,6 @@ export class AddCustomerService {
     return response;
   }
 
-  @logStep()
   async validateCustomerExistsToastMessage(customer: ICustomer) {
     await validateToastMessage(
       this.addNewCustomerPage,

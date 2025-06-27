@@ -27,3 +27,25 @@ export function logStep<This, Args extends any[], Return>(message?: string) {
     return replacementMethod;
   };
 }
+
+export function logAction<This, Args extends any[], Return>(stepTemplate: string) {
+  return function actualDecorator(
+    target: (this: This, ...args: Args) => Promise<Return>,
+    context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Promise<Return>>,
+  ) {
+    function replacementMethod(this: This, ...args: Args): Promise<Return> {
+      let stepName = stepTemplate;
+
+      if (stepTemplate.includes('{selector}')) {
+        stepName = stepName.replace('{selector}', `"${args[0]}"`);
+      }
+      if (stepTemplate.includes('{text}') && args.length > 1) {
+        stepName = stepName.replace('{text}', `"${args[1]}"`);
+      }
+
+      return test.step(stepName, async () => target.call(this, ...args), { box: false });
+    }
+
+    return replacementMethod;
+  };
+}

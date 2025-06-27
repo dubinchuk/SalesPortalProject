@@ -1,11 +1,13 @@
 import { APIResponse, request } from '@playwright/test';
 import _ from 'lodash';
 
+import { AllureReporter } from '../report/allure.reporter';
 import { IRequestOptions, IResponse, IResponseFields } from '../../data/types/api.types';
 import { apiConfig } from '../../config/apiConfig';
 
 export class RequestApi {
   private response!: APIResponse;
+  constructor(private reporter = new AllureReporter()) {}
 
   async send<T extends IResponseFields>(options: IRequestOptions): Promise<IResponse<T>> {
     try {
@@ -13,9 +15,12 @@ export class RequestApi {
         baseURL: options.baseURL ?? apiConfig.baseUrl,
       });
       this.response = await requestContext.fetch(options.url, _.omit(options, ['baseURL', 'url']));
+      const responseData = await this.transormReponse();
+      await this.reporter.logApiCall(options, responseData);
+
       if (this.response.status() >= 500)
         throw new Error('Request failed with status ' + this.response.status());
-      return await this.transormReponse();
+      return responseData;
     } catch (err) {
       throw err;
     }
