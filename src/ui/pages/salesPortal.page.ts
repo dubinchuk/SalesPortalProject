@@ -1,3 +1,5 @@
+import { logStep } from '../../utils/report/decorator.js';
+
 import { BasePage } from './base.page.js';
 
 export abstract class SalesPortalPage extends BasePage {
@@ -24,6 +26,7 @@ export abstract class SalesPortalPage extends BasePage {
     return text;
   }
 
+  @logStep('Close toast message')
   async closeToastMessage() {
     await this.click(this['Close toast button']);
     await this.waitForElement(this['Toast message'], 'hidden');

@@ -3,12 +3,11 @@ import { chromium, type FullConfig } from '@playwright/test';
 import signInApiService from '../api/services/signIn.api';
 
 import { BASE_URL } from './environment';
-
 const authFile = 'src/.auth/user.json';
 
 async function globalSetup(config: FullConfig) {
   try {
-    const token = await signInApiService.loginAsAdmin();
+    const token = await signInApiService.loginAsAdminForGlobalSetup();
     const browser = await chromium.launch();
     const page = await browser.newPage();
     await page.context().addCookies([

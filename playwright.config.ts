@@ -31,7 +31,7 @@ export default defineConfig({
     [
       'allure-playwright',
       {
-        // detail: true,
+        detail: true,
         outputFolder: 'allure-results',
         suiteTitle: false,
       },

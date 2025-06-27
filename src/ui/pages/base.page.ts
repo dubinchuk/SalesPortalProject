@@ -2,6 +2,7 @@ import { Locator, Page } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 
 import { IResponse } from '../../data/types/api.types';
+import { logAction } from '../../utils/report/decorator';
 
 const DEFAULT_TIMEOUT = 15000;
 
@@ -63,12 +64,14 @@ export class BasePage {
     }
   }
 
+  @logAction('Click on element with selector {selector}')
   protected async click(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {
     const element = await this.waitForElement(locator, 'visible', timeout);
     await element.isEnabled();
     await element.click();
   }
 
+  @logAction('Set {text} into element with selector {selector}')
   protected async setValue(
     locator: LocatorOrSelector,
     value: string | number,
@@ -83,6 +86,7 @@ export class BasePage {
     return await element.innerText({ timeout });
   }
 
+  @logAction('Select dropdown value from {selector}')
   protected async selectDropdownValue(
     dropdownLocator: LocatorOrSelector,
     value: string | number,
@@ -92,6 +96,7 @@ export class BasePage {
     await element.selectOption(String(value), { timeout });
   }
 
+  @logAction('Open URL {selector}')
   async openPage(url: string) {
     await this.page.goto(url);
   }
