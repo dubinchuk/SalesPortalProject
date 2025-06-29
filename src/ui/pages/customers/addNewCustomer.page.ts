@@ -1,4 +1,5 @@
 import { ICustomer } from '../../../data/types/customers.types';
+import { logStep } from '../../../utils/report/decorator';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class AddNewCustomerPage extends SalesPortalPage {
@@ -16,6 +17,7 @@ export class AddNewCustomerPage extends SalesPortalPage {
   private readonly 'Save New Customer button' = this.findElement('#save-new-customer');
   readonly 'Add New Customer form' = this.findElement('#add-new-customer-form');
 
+  @logStep('Fill customer inputs')
   async fillInputs(customer: Partial<ICustomer>) {
     customer.name && (await this.setValue(this['Name input'], customer.name));
     customer.email && (await this.setValue(this['Email input'], customer.email));
@@ -29,6 +31,7 @@ export class AddNewCustomerPage extends SalesPortalPage {
     customer.notes && (await this.setValue(this['Notes textarea'], customer.notes));
   }
 
+  @logStep('Click on Save New Customer button')
   async clickOnSaveButton() {
     await this.click(this['Save New Customer button']);
   }
