@@ -1,4 +1,5 @@
 import { CONTAINERS } from '../../data/types/home.types.js';
+import { logStep } from '../../utils/report/decorator.js';
 
 import { SalesPortalPage } from './salesPortal.page.js';
 
@@ -27,6 +28,7 @@ export class HomePage extends SalesPortalPage {
     return this.findElement(`${containerSelector} .spinner-border`);
   };
 
+  @logStep('Wait for Home page containers spinners to hide')
   async waitForHomeSpinnersToHide() {
     const spinners = (Object.keys(this.containers) as CONTAINERS[]).map((name) =>
       this.getSpinnerByContainerName(name),

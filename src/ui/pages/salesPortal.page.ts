@@ -9,14 +9,17 @@ export abstract class SalesPortalPage extends BasePage {
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
   private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
 
+  @logStep('Wait for unique page element')
   async waitForOpened() {
     await this.waitForElement(this.uniqueElement);
   }
 
+  @logStep('Wait for button spinner to hide')
   async waitForButtonSpinnerToHide() {
     await this.waitForSpinnerToHide(this['Button Spinner']);
   }
 
+  @logStep('Wait for table spinner to hide')
   async waitForTableSpinnerToHide() {
     await this.waitForSpinnerToHide(this['Table spinner']);
   }

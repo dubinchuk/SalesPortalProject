@@ -1,5 +1,8 @@
 import { test } from '@playwright/test';
 
+import { maskSensitiveData } from '../security/maskingUtils';
+import { sensitiveSelectors } from '../security/sensitiveData';
+
 /**
  * Decorator that wraps a step method with a Playwright test step.
  * Used for reporting purposes.
@@ -34,13 +37,18 @@ export function logAction<This, Args extends any[], Return>(stepTemplate: string
     context: ClassMethodDecoratorContext<This, (this: This, ...args: Args) => Promise<Return>>,
   ) {
     function replacementMethod(this: This, ...args: Args): Promise<Return> {
-      let stepName = stepTemplate;
+      const selector = args[0];
+      let value = args[1];
+      if (typeof value === 'string' && sensitiveSelectors.includes(selector)) {
+        value = maskSensitiveData(value);
+      }
 
+      let stepName = stepTemplate;
       if (stepTemplate.includes('{selector}')) {
         stepName = stepName.replace('{selector}', `"${args[0]}"`);
       }
       if (stepTemplate.includes('{text}') && args.length > 1) {
-        stepName = stepName.replace('{text}', `"${args[1]}"`);
+        stepName = stepName.replace('{text}', `"${value}"`);
       }
 
       return test.step(stepName, async () => target.call(this, ...args), { box: false });
