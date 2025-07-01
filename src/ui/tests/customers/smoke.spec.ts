@@ -25,6 +25,6 @@ test.describe('[UI] [Customers] Smoke', async function () {
     const response = await addNewCustomerPageService.create(customer, customersIdsToDelete);
     customersIdsToDelete.push(response.body.Customer._id);
     await customersPageService.validateCustomerCreatedMessage();
-    //TODO: check customer in table
+    await customersPageService.checkCustomerInTable(customer);
   });
 });
