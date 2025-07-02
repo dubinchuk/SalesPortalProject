@@ -6,7 +6,7 @@ import { HomePage } from '../pages/home.page.js';
 import { SignInPage } from '../pages/login.page.js';
 import { logStep } from '../../utils/report/decorator.js';
 
-export class SignInService {
+export class SignInPageService {
   private signInPage: SignInPage;
   private homePage: HomePage;
   constructor(protected page: Page) {

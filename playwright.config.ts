@@ -54,7 +54,7 @@ export default defineConfig({
       name: 'ui',
       use: {
         ...devices['Desktop Chrome'],
-        headless: true,
+        headless: false,
         storageState: 'src/.auth/user.json',
       },
       testMatch: /.*\.spec\.ts/,

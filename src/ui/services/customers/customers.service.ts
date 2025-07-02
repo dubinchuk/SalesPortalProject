@@ -120,8 +120,6 @@ export class CustomersListService {
   @logStep('Check customer in table')
   async checkCustomerInTable(expectedCustomer: ICustomer) {
     const actualCustomer = await this.customersPage.getDataByEmail(expectedCustomer.email);
-    console.log(`actual: ${actualCustomer}`);
-    console.log(`expected: ${expectedCustomer}`);
     expect(actualCustomer).toEqual(_.pick(expectedCustomer, 'email', 'name', 'country'));
   }
 }
