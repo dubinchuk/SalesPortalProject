@@ -116,4 +116,12 @@ export class BasePage {
       headers: response.headers(),
     };
   }
+
+  async getCookies() {
+    return this.page.context().cookies();
+  }
+
+  async clearCookies() {
+    await this.page.context().clearCookies();
+  }
 }
