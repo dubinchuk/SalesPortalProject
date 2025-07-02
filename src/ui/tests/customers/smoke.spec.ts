@@ -1,3 +1,4 @@
+import { generateNewCustomer } from '../../../data/customers/generateCustomer';
 import { test } from '../../../fixtures/services.fixtures';
 
 test.describe('[UI] [Customers] Smoke', async function () {
@@ -20,9 +21,10 @@ test.describe('[UI] [Customers] Smoke', async function () {
   }) {
     await homePageService.openCustomersPage();
     await customersPageService.openAddNewCustomerPage();
-    const response = await addNewCustomerPageService.create();
+    const customer = generateNewCustomer();
+    const response = await addNewCustomerPageService.create(customer, customersIdsToDelete);
     customersIdsToDelete.push(response.body.Customer._id);
     await customersPageService.validateCustomerCreatedMessage();
-    //TODO: check customer in table
+    await customersPageService.checkCustomerInTable(customer);
   });
 });

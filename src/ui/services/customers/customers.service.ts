@@ -1,10 +1,12 @@
 import { expect, Page } from '@playwright/test';
+import _ from 'lodash';
 
 import { AddNewCustomerPage } from '../../pages/customers/addNewCustomer.page.js';
 import { CustomersListPage } from '../../pages/customers/customers.page.js';
 import {
   COUNTRIES,
   CUSTOMERS_COLUMN_NAME,
+  ICustomer,
   ICustomersTable,
 } from '../../../data/types/customers.types.js';
 import { TABLE_MESSAGES } from '../../../data/customers/customersList.js';
@@ -113,5 +115,13 @@ export class CustomersListService {
   async validateEmptyTable(message?: string) {
     const actualMessage = await this.customersPage.getEmptyTableMessage();
     expect(actualMessage).toEqual(message ?? TABLE_MESSAGES.EMPTY_TABLE);
+  }
+
+  @logStep('Check customer in table')
+  async checkCustomerInTable(expectedCustomer: ICustomer) {
+    const actualCustomer = await this.customersPage.getDataByEmail(expectedCustomer.email);
+    console.log(`actual: ${actualCustomer}`);
+    console.log(`expected: ${expectedCustomer}`);
+    expect(actualCustomer).toEqual(_.pick(expectedCustomer, 'email', 'name', 'country'));
   }
 }

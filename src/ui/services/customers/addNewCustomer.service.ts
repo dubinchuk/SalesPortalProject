@@ -29,7 +29,7 @@ export class AddCustomerService {
   }
 
   @logStep('Create customer')
-  async create(customer?: ICustomer) {
+  async create(customer?: ICustomer, customersIdsToDelete?: string[]) {
     const customerData = customer ?? generateNewCustomer();
     await this.fillCustomerInputs(customerData);
     const responseUrl = apiConfig.baseUrl + apiConfig.endpoints.Customers;
@@ -37,6 +37,11 @@ export class AddCustomerService {
       responseUrl,
       this.save.bind(this),
     );
+
+    if (customersIdsToDelete && response.body.Customer._id) {
+      customersIdsToDelete.push(response.body.Customer._id);
+    }
+
     validateResponse<ICustomerResponse>(response, STATUS_CODES.CREATED, true, null);
     expect(response.body.Customer).toMatchObject({
       ...customerData,
