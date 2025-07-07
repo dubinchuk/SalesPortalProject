@@ -10,9 +10,6 @@ export class HomePage extends SalesPortalPage {
   private readonly 'Products button' = this.findElement('#products-from-home');
   private readonly 'Customers button' = this.findElement('#customers-from-home');
 
-  readonly sideMenuElement = (itemName: 'Products' | 'Customers' | 'Orders') =>
-    `//a[text()[normalize-space() = 'View ${itemName}']]`;
-
   private readonly containers: Record<CONTAINERS, string> = {
     [CONTAINERS.ORDERS_THIS_YEAR]: '#total-orders-container',
     [CONTAINERS.TOTAL_REVENUE]: '#total-revenue-container',
@@ -39,11 +36,7 @@ export class HomePage extends SalesPortalPage {
     await this.waitForSpinnerToHide(spinners);
   }
 
-  async clickOnViewDetailsButton(moduleName: 'Products' | 'Customers' | 'Orders') {
+  async openViewDetailsModule(moduleName: 'Products' | 'Customers' | 'Orders') {
     await this.click(this[`${moduleName} button`]);
-  }
-
-  async openModule(module: 'Products' | 'Customers' | 'Orders') {
-    await this.click(this.sideMenuElement(module));
   }
 }

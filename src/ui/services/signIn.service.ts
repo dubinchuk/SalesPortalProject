@@ -29,7 +29,7 @@ export class SignInPageService {
   }
 
   @logStep('Login as Admin')
-  async loginAsAdmin() {
+  async signInAsAdmin() {
     await this.login({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
   }
 

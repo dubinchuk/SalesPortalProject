@@ -5,13 +5,17 @@ test.describe('[UI] [Products]', async function () {
     await signInService.openSalesPortal();
   });
 
-  test('Create a new product with valid data', async function ({ productsPageService }) {
-    await productsPageService.openProductsPage();
-    await productsPageService.openAddNewProductPage();
-    await productsPageService.populateProduct();
-  });
-
   test.afterEach(async function ({ productsPageService }) {
     await productsPageService.delete();
+  });
+
+  test('Create a new product with valid data', async function ({
+    productsPageService,
+    homePageService,
+  }) {
+    await homePageService.openProductsPage();
+    await productsPageService.openAddNewProductPage();
+    await productsPageService.createProduct();
+    await productsPageService.checkProductInTable();
   });
 });

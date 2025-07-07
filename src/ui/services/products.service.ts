@@ -1,4 +1,5 @@
-import { Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
+import _ from 'lodash';
 
 import { ProductsListPage } from '../pages/products/products.page';
 import { AddNewProductPage } from '../pages/products/addNewProduct.page';
@@ -8,26 +9,30 @@ import { apiConfig } from '../../config/apiConfig';
 import { STATUS_CODES } from '../../data/types/api.types';
 import { validateResponse } from '../../utils/validation/response';
 import { Product } from '../../services/product.service';
+import { logStep } from '../../utils/report/decorator';
 
 import { SalesPortalPageService } from './salesPortal.service';
 
-export class ProductsPageService extends SalesPortalPageService {
+export class ProductsPageService {
   private productsListPage: ProductsListPage;
   private addNewProductPage: AddNewProductPage;
   private product: Product;
+  private salesPortalService: SalesPortalPageService;
   constructor(page: Page) {
-    super(page);
     this.productsListPage = new ProductsListPage(page);
     this.addNewProductPage = new AddNewProductPage(page);
     this.product = new Product(page);
+    this.salesPortalService = new SalesPortalPageService(page);
   }
 
+  @logStep('Open Add New Product Page')
   async openAddNewProductPage() {
     await this.productsListPage.clickOnAddNewProductButton();
     await this.addNewProductPage.waitForOpened();
   }
 
-  async populateProduct(productData?: IProduct) {
+  @logStep('Create product')
+  async createProduct(productData?: IProduct) {
     const data = generateNewProduct(productData);
     await this.addNewProductPage.fillProductInputs(data);
     const responseUrl = apiConfig.baseUrl + apiConfig.endpoints.Products;
@@ -38,9 +43,20 @@ export class ProductsPageService extends SalesPortalPageService {
     validateResponse<IProductResponse>(response, STATUS_CODES.CREATED, true, null);
     this.product.createFromExisting(response.body.Product);
     await this.productsListPage.waitForOpened();
-    await this.validateNotification('Product was successfully created');
+    await this.salesPortalService.validateToastMessageAndClose(
+      this.productsListPage,
+      'Product was successfully created',
+    );
   }
 
+  @logStep('Check product in table')
+  async checkProductInTable(data?: IProduct) {
+    const expectedProduct = data ?? this.product.getSettings();
+    const actualProduct = await this.productsListPage.getDataByName(expectedProduct.name);
+    expect(actualProduct).toEqual(_.pick(expectedProduct, 'name', 'price', 'manufacturer'));
+  }
+
+  @logStep('Delete product')
   async delete() {
     await this.product.delete();
   }

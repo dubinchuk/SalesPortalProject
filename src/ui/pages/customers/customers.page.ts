@@ -33,7 +33,7 @@ export class CustomersListPage extends SalesPortalPage {
   }
 
   private async getColumnData(columnName: CUSTOMERS_COLUMN_NAME) {
-    const locator = this.page.locator(this[`${columnName} column data`]);
+    const locator = this.findElement(this[`${columnName} column data`]);
     const elements = await locator.all();
     return Promise.all(elements.map((element) => element.innerText()));
   }

@@ -1,23 +1,17 @@
 import { expect, Page } from '@playwright/test';
 
-import { HomePage } from '../pages/home.page';
-import { ProductsListPage } from '../pages/products/products.page';
+import { SalesPortalPage } from '../pages/salesPortal.page';
 
 export class SalesPortalPageService {
-  private homePage: HomePage;
-  private productsPage: ProductsListPage;
-  constructor(page: Page) {
-    this.homePage = new HomePage(page);
-    this.productsPage = new ProductsListPage(page);
-  }
+  constructor(page: Page) {}
 
-  async openProductsPage() {
-    await this.homePage.openModule('Products');
-    await this.productsPage.waitForOpened();
-  }
-
-  async validateNotification(expectedMessage: string) {
-    const actualMessage = await this.homePage.getToastMessage();
+  async validateToastMessage(salesPortalPage: SalesPortalPage, expectedMessage: string) {
+    const actualMessage = await salesPortalPage.getToastMessage();
     expect(actualMessage).toBe(expectedMessage);
+  }
+
+  async validateToastMessageAndClose(salesPortalPage: SalesPortalPage, expectedMessage: string) {
+    await this.validateToastMessage(salesPortalPage, expectedMessage);
+    await salesPortalPage.closeToastMessage();
   }
 }
