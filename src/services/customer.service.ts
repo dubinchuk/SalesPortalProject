@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { expect } from '@playwright/test';
 import _ from 'lodash';
 
 import { ICustomer, ICustomerFromResponse } from '../data/types/customers.types';
@@ -11,12 +11,10 @@ import { validateResponse } from '../utils/validation/response';
 import { SignInService } from './signIn.service';
 
 export class Customer {
-  private signInService: SignInService;
   private service: CustomerApiClient;
   private settings: ICustomerFromResponse | undefined;
 
-  constructor(private page: Page) {
-    this.signInService = new SignInService(this.page);
+  constructor(private signInService: SignInService) {
     this.service = new CustomerApiClient();
   }
 

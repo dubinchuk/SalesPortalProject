@@ -18,6 +18,7 @@ import { validateResponse } from '../../utils/validation/response.js';
 import { apiConfig } from '../../config/apiConfig.js';
 import { generateNewCustomer } from '../../data/customers/generateCustomer.js';
 import { STATUS_CODES } from '../../data/types/api.types.js';
+import { SignInService } from '../../services/signIn.service.js';
 
 import { SalesPortalPageService } from './salesPortal.service.js';
 
@@ -27,10 +28,10 @@ export class CustomersPageService {
   private customer: Customer;
   private salesPortalService: SalesPortalPageService;
 
-  constructor(page: Page) {
+  constructor(page: Page, signInService: SignInService) {
     this.customersListPage = new CustomersListPage(page);
     this.addNewCustomerPage = new AddNewCustomerPage(page);
-    this.customer = new Customer(page);
+    this.customer = new Customer(signInService);
     this.salesPortalService = new SalesPortalPageService(page);
   }
 
