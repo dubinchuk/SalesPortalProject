@@ -19,8 +19,8 @@ interface ISalesPortalServices {
 }
 
 export const test = base.extend<ISalesPortalServices>({
-  customersPageService: async ({ page }, use) => {
-    await use(new CustomersPageService(page));
+  customersPageService: async ({ page, signInService }, use) => {
+    await use(new CustomersPageService(page, signInService));
   },
 
   homePageService: async ({ page }, use) => {
@@ -31,20 +31,20 @@ export const test = base.extend<ISalesPortalServices>({
     await use(new SignInPageService(page));
   },
 
-  customer: async ({ page }, use) => {
-    await use(new Customer(page));
+  customer: async ({ signInService }, use) => {
+    await use(new Customer(signInService));
   },
 
   signInService: async ({ page }, use) => {
     await use(new SignInService(page));
   },
 
-  product: async ({ page }, use) => {
-    await use(new Product(page));
+  product: async ({ signInService }, use) => {
+    await use(new Product(signInService));
   },
 
-  productsPageService: async ({ page }, use) => {
-    await use(new ProductsPageService(page));
+  productsPageService: async ({ page, signInService }, use) => {
+    await use(new ProductsPageService(page, signInService));
   },
 });
 

@@ -10,6 +10,7 @@ import { STATUS_CODES } from '../../data/types/api.types';
 import { validateResponse } from '../../utils/validation/response';
 import { Product } from '../../services/product.service';
 import { logStep } from '../../utils/report/decorator';
+import { SignInService } from '../../services/signIn.service';
 
 import { SalesPortalPageService } from './salesPortal.service';
 
@@ -18,10 +19,10 @@ export class ProductsPageService {
   private addNewProductPage: AddNewProductPage;
   private product: Product;
   private salesPortalService: SalesPortalPageService;
-  constructor(page: Page) {
+  constructor(page: Page, signInService: SignInService) {
     this.productsListPage = new ProductsListPage(page);
     this.addNewProductPage = new AddNewProductPage(page);
-    this.product = new Product(page);
+    this.product = new Product(signInService);
     this.salesPortalService = new SalesPortalPageService(page);
   }
 

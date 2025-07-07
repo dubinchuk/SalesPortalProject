@@ -1,4 +1,3 @@
-import { Page } from '@playwright/test';
 import moment from 'moment';
 
 import { ProductsApiClient } from '../api/clients/products.client';
@@ -10,12 +9,10 @@ import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
 import { SignInService } from './signIn.service';
 
 export class Product {
-  private signInService: SignInService;
   private service: ProductsApiClient;
   private settings: IProductFromResponse | undefined;
 
-  constructor(private page: Page) {
-    this.signInService = new SignInService(this.page);
+  constructor(private signInService: SignInService) {
     this.service = new ProductsApiClient();
   }
 
