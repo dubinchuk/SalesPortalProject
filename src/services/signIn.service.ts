@@ -10,7 +10,6 @@ import { STATUS_CODES } from '../data/types/api.types';
 import { apiConfig } from '../config/apiConfig';
 
 export class SignInService {
-  static instance: SignInService;
   private homePage: HomePage;
   private signInPage: SignInPage;
 
@@ -24,11 +23,7 @@ export class SignInService {
     this.signInPage = new SignInPage(page);
     this.homePage = new HomePage(page);
 
-    if (SignInService.instance) {
-      return SignInService.instance;
-    }
     if (token) this.token = token;
-    SignInService.instance = this;
   }
 
   async getToken(): Promise<string> {
