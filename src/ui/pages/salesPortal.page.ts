@@ -8,6 +8,13 @@ export abstract class SalesPortalPage extends BasePage {
   private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
   private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
+  private readonly headerMenuElement = (
+    itemName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers',
+  ) => `//a[contains(@class, 'justify-content-start')]/text()[.='${itemName}']`;
+
+  async openHeaderModule(moduleName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers') {
+    await this.click(this.headerMenuElement(moduleName));
+  }
 
   @logStep('Wait for unique page element')
   async waitForOpened() {

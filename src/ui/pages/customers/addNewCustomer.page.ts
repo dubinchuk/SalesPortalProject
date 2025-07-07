@@ -18,7 +18,7 @@ export class AddNewCustomerPage extends SalesPortalPage {
   readonly 'Add New Customer form' = this.findElement('#add-new-customer-form');
 
   @logStep('Fill customer inputs')
-  async fillInputs(customer: Partial<ICustomer>) {
+  async fillCustomerInputs(customer: Partial<ICustomer>) {
     customer.name && (await this.setValue(this['Name input'], customer.name));
     customer.email && (await this.setValue(this['Email input'], customer.email));
     customer.country &&
@@ -32,7 +32,7 @@ export class AddNewCustomerPage extends SalesPortalPage {
   }
 
   @logStep('Click on Save New Customer button')
-  async clickOnSaveButton() {
+  async clickOnSaveNewCustomerButton() {
     await this.click(this['Save New Customer button']);
   }
 }

@@ -37,4 +37,12 @@ export class ProductsListPage extends SalesPortalPage {
   async openDeleteProduct(productName: string) {
     await this.click(this['Delete button by product name'](productName));
   }
+
+  async getDataByName(name: string) {
+    const [price, manufacturer] = await Promise.all([
+      this.getText(this['Price by product name'](name)),
+      this.getText(this['Manufacturer by product name'](name)),
+    ]);
+    return { name, price: +price.replace('$', ''), manufacturer };
+  }
 }

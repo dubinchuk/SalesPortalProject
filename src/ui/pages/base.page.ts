@@ -13,7 +13,7 @@ function isSelector(elementOrSelector: LocatorOrSelector): elementOrSelector is 
 }
 
 export class BasePage {
-  constructor(protected page: Page) {}
+  constructor(private page: Page) {}
 
   protected findElement(locator: LocatorOrSelector) {
     return isSelector(locator) ? this.page.locator(locator) : locator;

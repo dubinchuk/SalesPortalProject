@@ -19,6 +19,7 @@ export class Product {
     this.service = new ProductsApiClient();
   }
 
+  //TODO: добавить возможность работы с несколькими продуктами
   async create(customProductData?: Partial<IProduct>) {
     const productData = generateNewProduct(customProductData);
     const token = await this.signInService.getToken();

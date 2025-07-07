@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { expect, Page, request } from '@playwright/test';
 
 import { SignInApiClient } from '../api/clients/signIn.client';
 import { ADMIN_PASSWORD, ADMIN_USERNAME, BASE_URL, TESTS } from '../config/environment';
@@ -6,6 +6,8 @@ import { IUserCredentials } from '../data/types/user.types';
 import { SignInPage } from '../ui/pages/login.page';
 import { HomePage } from '../ui/pages/home.page';
 import { logStep } from '../utils/report/decorator';
+import { STATUS_CODES } from '../data/types/api.types';
+import { apiConfig } from '../config/apiConfig';
 
 export class SignInService {
   static instance: SignInService;
@@ -71,6 +73,7 @@ export class SignInService {
     try {
       const response = await this.service.login(credentials);
       this.token = response.headers.authorization;
+      expect(response.status).toBe(STATUS_CODES.OK);
     } catch (error) {
       throw new Error(`Failed to sign in via Api. Reason:\n${(error as Error).message}`);
     }
@@ -95,5 +98,39 @@ export class SignInService {
     if (TESTS === 'ui') {
       await this.homePage.clearCookies();
     }
+  }
+
+  // Метод без test.step для использования в globalSetup
+  async signInAsAdminForGlobalSetup() {
+    const requestContext = await request.newContext({
+      baseURL: apiConfig.baseUrl,
+    });
+
+    const response = await requestContext.post(apiConfig.endpoints.Login, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: {
+        username: ADMIN_USERNAME,
+        password: ADMIN_PASSWORD,
+      },
+    });
+
+    if (response.status() !== STATUS_CODES.OK) {
+      const body = await response.text();
+      throw new Error(`Login failed with status ${response.status()} and body: ${body}`);
+    }
+
+    const responseHeaders = response.headers();
+    const token = responseHeaders['authorization'];
+
+    if (!token) {
+      throw new Error('Authorization token not found in login response headers');
+    }
+
+    await requestContext.dispose();
+
+    this.token = `Bearer ${token}`;
+    return responseHeaders['authorization'];
   }
 }

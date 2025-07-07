@@ -6,12 +6,12 @@ test.describe('[UI] [Login]', async function () {
     await signInPageService.openSalesPortal();
   });
 
-  test('Login with valid credentials', async function ({ signInPageService }) {
-    await signInPageService.loginAsAdmin();
+  test('Login with valid credentials', async function ({ signInService }) {
+    await signInService.signInAsAdminUI();
   });
 
-  test('Open Customers list page', async function ({ signInPageService, homePageService }) {
-    await signInPageService.loginAsAdmin();
+  test('Open Customers list page', async function ({ signInService, homePageService }) {
+    await signInService.signInAsAdminUI();
     await homePageService.openCustomersPage();
   });
 });
