@@ -1,10 +1,12 @@
 import moment from 'moment';
 
 import { ProductsApiClient } from '../api/clients/products.client';
-import { IProduct, IProductFromResponse } from '../data/types/product.types';
+import { IProduct, IProductFromResponse, IProductResponse } from '../data/types/product.types';
 import { generateNewProduct } from '../data/products/generateProduct';
-import { STATUS_CODES } from '../data/types/api.types';
+import { IResponse, STATUS_CODES } from '../data/types/api.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
+import { validateResponse, validateSchema } from '../utils/validation/response';
+import { createdProductSchema } from '../data/schema/product.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -21,6 +23,7 @@ export class Product {
     const productData = generateNewProduct(customProductData);
     const token = await this.signInService.getToken();
     const response = await this.service.create(productData, token);
+
     if (response.status !== STATUS_CODES.CREATED) {
       throw new ResponseError(`Failed to create product`, {
         status: response.status,
@@ -28,8 +31,44 @@ export class Product {
         ErrorMessage: response.body.ErrorMessage,
       });
     }
+
     this.setSettings(response.body.Product);
     return this.getSettings();
+  }
+
+  async createAndValidate(customProductData?: Partial<IProduct>) {
+    const productData = generateNewProduct(customProductData);
+    const token = await this.signInService.getToken();
+    const response = await this.service.create(productData, token);
+
+    if (response.status !== STATUS_CODES.CREATED) {
+      throw new ResponseError(`Failed to create product`, {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      });
+    }
+
+    this.setSettings(response.body.Product);
+
+    this.validateCreateProductResponse(response, productData);
+    this.validateCreatedProductSchema(response);
+
+    return this.getSettings();
+  }
+
+  validateCreateProductResponse(response: IResponse<IProductResponse>, productData: IProduct) {
+    validateResponse<IProductResponse>(
+      response,
+      STATUS_CODES.CREATED,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
+    validateSchema<IProductResponse>(response, createdProductSchema);
   }
 
   createFromExisting(product: IProductFromResponse) {

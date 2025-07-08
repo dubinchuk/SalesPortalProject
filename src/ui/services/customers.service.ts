@@ -14,11 +14,11 @@ import { TABLE_MESSAGES } from '../../data/customers/customersList.js';
 import { TOAST_MESSAGES } from '../../data/messages/messages.js';
 import { logStep } from '../../utils/report/decorator.js';
 import { Customer } from '../../services/customer.service.js';
-import { validateResponse } from '../../utils/validation/response.js';
 import { apiConfig } from '../../config/apiConfig.js';
 import { generateNewCustomer } from '../../data/customers/generateCustomer.js';
-import { STATUS_CODES } from '../../data/types/api.types.js';
 import { SignInService } from '../../services/signIn.service.js';
+import { STATUS_CODES } from '../../data/types/api.types.js';
+import { ResponseError } from '../../utils/errors/errors.js';
 
 import { SalesPortalPageService } from './salesPortal.service.js';
 
@@ -49,30 +49,34 @@ export class CustomersPageService {
   }
 
   @logStep('Create customer')
-  async create(customerData?: ICustomer) {
-    await this.populateCustomer();
+  async create(customCustomerData?: ICustomer) {
+    await this.populateCustomer(customCustomerData);
     const responseUrl = apiConfig.baseUrl + apiConfig.endpoints.Customers;
     const response = await this.addNewCustomerPage.interceptResponse<ICustomerResponse>(
       responseUrl,
       this.save.bind(this),
     );
 
+    if (response.status !== STATUS_CODES.CREATED) {
+      throw new ResponseError(`Failed to create customer`, {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      });
+    }
+
     this.customer.createFromExisting(response.body.Customer);
-    validateResponse<ICustomerResponse>(response, STATUS_CODES.CREATED, true, null);
-    expect(response.body.Customer).toMatchObject({
-      ...customerData,
-      createdOn: response.body.Customer.createdOn,
-      _id: response.body.Customer._id,
-    });
     await this.addNewCustomerPage.waitForButtonSpinnerToHide();
     await this.customersListPage.waitForOpened();
     await this.customersListPage.waitForTableSpinnerToHide();
-    return response;
+    await this.validateCustomerCreatedMessage();
+    await this.checkCustomerInTable();
   }
 
-  async populateCustomer(customerData?: ICustomer) {
-    const data = customerData ?? generateNewCustomer();
+  async populateCustomer(customCustomerData?: ICustomer) {
+    const data = customCustomerData ?? generateNewCustomer();
     await this.addNewCustomerPage.fillCustomerInputs(data);
+    return data;
   }
 
   async save() {

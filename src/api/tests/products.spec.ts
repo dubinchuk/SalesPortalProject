@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/services.fixtures';
 
 test.describe('[API] Products', async function () {
   test('Create product', async function ({ product }) {
-    await product.create();
+    await product.createAndValidate();
     await product.delete();
   });
 

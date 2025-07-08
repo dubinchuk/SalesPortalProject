@@ -38,6 +38,7 @@ export class AllureReporter {
           });
         }
 
+        //FIX ложноотрицательные результаты негативных проверок
         if (response.status >= 400) {
           test.info().status = 'failed';
         }

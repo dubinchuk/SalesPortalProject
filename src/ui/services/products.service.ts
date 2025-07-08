@@ -6,11 +6,12 @@ import { AddNewProductPage } from '../pages/products/addNewProduct.page';
 import { generateNewProduct } from '../../data/products/generateProduct';
 import { IProduct, IProductResponse } from '../../data/types/product.types';
 import { apiConfig } from '../../config/apiConfig';
-import { STATUS_CODES } from '../../data/types/api.types';
-import { validateResponse } from '../../utils/validation/response';
 import { Product } from '../../services/product.service';
 import { logStep } from '../../utils/report/decorator';
 import { SignInService } from '../../services/signIn.service';
+import { TOAST_MESSAGES } from '../../data/messages/messages';
+import { STATUS_CODES } from '../../data/types/api.types';
+import { ResponseError } from '../../utils/errors/errors';
 
 import { SalesPortalPageService } from './salesPortal.service';
 
@@ -33,20 +34,40 @@ export class ProductsPageService {
   }
 
   @logStep('Create product')
-  async createProduct(productData?: IProduct) {
-    const data = generateNewProduct(productData);
-    await this.addNewProductPage.fillProductInputs(data);
+  async create(customProductData?: IProduct) {
+    await this.populateProduct(customProductData);
     const responseUrl = apiConfig.baseUrl + apiConfig.endpoints.Products;
     const response = await this.addNewProductPage.interceptResponse<IProductResponse>(
       responseUrl,
       this.addNewProductPage.clickOnSaveNewProductButton.bind(this.addNewProductPage),
     );
-    validateResponse<IProductResponse>(response, STATUS_CODES.CREATED, true, null);
+
+    if (response.status !== STATUS_CODES.CREATED) {
+      throw new ResponseError(`Failed to create product`, {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      });
+    }
+
     this.product.createFromExisting(response.body.Product);
+    await this.addNewProductPage.waitForButtonSpinnerToHide();
     await this.productsListPage.waitForOpened();
+    await this.productsListPage.waitForTableSpinnerToHide();
+    await this.validateProductCreatedMessage();
+    await this.checkProductInTable();
+  }
+
+  async populateProduct(customProductData?: IProduct) {
+    const data = customProductData ?? generateNewProduct();
+    await this.addNewProductPage.fillProductInputs(data);
+    return data;
+  }
+  @logStep('Validate product created message')
+  async validateProductCreatedMessage() {
     await this.salesPortalService.validateToastMessageAndClose(
       this.productsListPage,
-      'Product was successfully created',
+      TOAST_MESSAGES.PRODUCT.CREATED,
     );
   }
 
@@ -61,4 +82,10 @@ export class ProductsPageService {
   async delete() {
     await this.product.delete();
   }
+
+  //TODO: delete product UI
+  // @logStep('Delete product UI')
+  // async deleteUI() {
+  //   await this.productsListPage.openDeleteProduct(this.product.getSettings().name);
+  // }
 }

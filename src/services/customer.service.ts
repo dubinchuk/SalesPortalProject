@@ -1,12 +1,10 @@
-import { expect } from '@playwright/test';
-import _ from 'lodash';
-
-import { ICustomer, ICustomerFromResponse } from '../data/types/customers.types';
+import { ICustomer, ICustomerFromResponse, ICustomerResponse } from '../data/types/customers.types';
 import { CustomerApiClient } from '../api/clients/customers.client';
 import { generateNewCustomer } from '../data/customers/generateCustomer';
-import { STATUS_CODES } from '../data/types/api.types';
+import { IResponse, STATUS_CODES } from '../data/types/api.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
-import { validateResponse } from '../utils/validation/response';
+import { validateResponse, validateSchema } from '../utils/validation/response';
+import { createdCustomerSchema } from '../data/schema/customer.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -23,17 +21,53 @@ export class Customer {
     const customerData = generateNewCustomer(customCustomerData);
     const token = await this.signInService.getToken();
     const response = await this.service.create(customerData, token);
+
+    if (response.status !== STATUS_CODES.CREATED) {
+      throw new ResponseError(`Failed to create customer`, {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      });
+    }
+
     this.setSettings(response.body.Customer);
-    // if (response.status !== STATUS_CODES.CREATED) {
-    //   throw new ResponseError('Failed to create customer', {
-    //     status: response.status,
-    //     IsSuccess: response.body.IsSuccess,
-    //     ErrorMessage: response.body.ErrorMessage,
-    //   });
-    // }
-    validateResponse(response, STATUS_CODES.CREATED, true, null);
-    expect(_.omit(response.body.Customer, ['_id', 'createdOn'])).toEqual({ ...customerData });
     return this.getSettings();
+  }
+
+  async createAndValidate(customCustomerData?: Partial<ICustomer>) {
+    const customerData = generateNewCustomer(customCustomerData);
+    const token = await this.signInService.getToken();
+    const response = await this.service.create(customerData, token);
+
+    if (response.status !== STATUS_CODES.CREATED) {
+      throw new ResponseError(`Failed to create customer`, {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      });
+    }
+
+    this.setSettings(response.body.Customer);
+
+    this.validateCreatedCustomerResponse(response, customerData);
+    this.validateCreatedCustomerSchema(response);
+
+    return this.getSettings();
+  }
+
+  validateCreatedCustomerResponse(response: IResponse<ICustomerResponse>, customerData: ICustomer) {
+    validateResponse<ICustomerResponse>(
+      response,
+      STATUS_CODES.CREATED,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  validateCreatedCustomerSchema(response: IResponse<ICustomerResponse>) {
+    validateSchema<ICustomerResponse>(response, createdCustomerSchema);
   }
 
   createFromExisting(customer: ICustomerFromResponse) {
@@ -63,6 +97,7 @@ export class Customer {
       notes: settings.notes,
     };
   }
+
   async delete() {
     const token = await this.signInService.getToken();
     const response = await this.service.delete(this.getSettings()._id, token);

@@ -24,6 +24,7 @@ export const createdProductSchema = {
         },
         createdOn: {
           type: 'string',
+          format: 'date-time',
         },
         notes: {
           type: 'string',
