@@ -7,6 +7,6 @@ test.describe('[API] [Customers]', async function () {
 
   test('Create customer with valid data', async function ({ signInService, customer }) {
     await signInService.signInAsAdminAPI();
-    await customer.create();
+    await customer.createAndValidate();
   });
 });

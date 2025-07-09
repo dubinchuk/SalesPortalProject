@@ -7,7 +7,7 @@ export class SalesPortalPageService {
 
   async validateToastMessage(salesPortalPage: SalesPortalPage, expectedMessage: string) {
     const actualMessage = await salesPortalPage.getToastMessage();
-    expect(actualMessage).toBe(expectedMessage);
+    expect.soft(actualMessage).toBe(expectedMessage);
   }
 
   async validateToastMessageAndClose(salesPortalPage: SalesPortalPage, expectedMessage: string) {

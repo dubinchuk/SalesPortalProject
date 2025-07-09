@@ -5,7 +5,11 @@ import { IRequestOptions, IResponse } from '../../data/types/api.types';
 export class AllureReporter {
   constructor() {}
 
-  public async logApiCall(options: IRequestOptions, response: IResponse): Promise<void> {
+  public async logApiCall(
+    options: IRequestOptions,
+    response: IResponse,
+    expectError?: boolean,
+  ): Promise<void> {
     const method = options.method?.toUpperCase();
     const url = options.url;
     await test.step(`API ${options.method?.toUpperCase()} ${options.url}`, async () => {
@@ -38,7 +42,7 @@ export class AllureReporter {
           });
         }
 
-        if (response.status >= 400) {
+        if (response.status >= 400 && !expectError) {
           test.info().status = 'failed';
         }
       });

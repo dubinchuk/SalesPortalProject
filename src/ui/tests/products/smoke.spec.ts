@@ -15,7 +15,6 @@ test.describe('[UI] [Products]', async function () {
   }) {
     await homePageService.openProductsPage();
     await productsPageService.openAddNewProductPage();
-    await productsPageService.createProduct();
-    await productsPageService.checkProductInTable();
+    await productsPageService.create();
   });
 });

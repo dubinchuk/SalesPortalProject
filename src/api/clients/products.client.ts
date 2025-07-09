@@ -8,7 +8,7 @@ export class ProductsApiClient {
   constructor(private apiClient = new RequestApi()) {}
 
   @logStep('Create product via API')
-  async create(product: IProduct, token: string) {
+  async create(product: IProduct, token: string, expectError: boolean = false) {
     const options: IRequestOptions = {
       method: 'post',
       baseURL: apiConfig.baseUrl,
@@ -19,7 +19,8 @@ export class ProductsApiClient {
       },
       data: product,
     };
-    return this.apiClient.send<IProductResponse>(options);
+
+    return await this.apiClient.send<IProductResponse>(options, expectError);
   }
 
   @logStep('Get product by id via API')
@@ -33,7 +34,8 @@ export class ProductsApiClient {
         Authorization: token,
       },
     };
-    return this.apiClient.send<IProductResponse>(options);
+
+    return await this.apiClient.send<IProductResponse>(options);
   }
 
   @logStep('Get all products via API')
@@ -47,7 +49,8 @@ export class ProductsApiClient {
         Authorization: token,
       },
     };
-    return this.apiClient.send<IProductsResponse>(options);
+
+    return await this.apiClient.send<IProductsResponse>(options);
   }
 
   @logStep('Update product via API')
@@ -62,7 +65,8 @@ export class ProductsApiClient {
       },
       data: data,
     };
-    return this.apiClient.send<IProductResponse>(options);
+
+    return await this.apiClient.send<IProductResponse>(options);
   }
 
   @logStep('Delete product via API')
@@ -76,6 +80,7 @@ export class ProductsApiClient {
         Authorization: token,
       },
     };
-    return this.apiClient.send(options);
+
+    return await this.apiClient.send(options);
   }
 }

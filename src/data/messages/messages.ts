@@ -4,4 +4,8 @@ export const TOAST_MESSAGES = {
     DELETED: 'Customer was successfully deleted',
     EXISTS: (email: string) => `Customer with email '${email}' already exists`,
   },
+  PRODUCT: {
+    CREATED: 'Product was successfully created',
+    DELETED: 'Product was successfully deleted',
+  },
 };
