@@ -19,10 +19,10 @@ export class Product {
   }
 
   //TODO: добавить возможность работы с несколькими продуктами
-  async create(customProductData?: Partial<IProduct>) {
+  async create(customProductData?: Partial<IProduct>, expectError?: boolean) {
     const productData = generateNewProduct(customProductData);
     const token = await this.signInService.getToken();
-    const response = await this.service.create(productData, token);
+    const response = await this.service.create(productData, token, expectError);
 
     if (response.status !== STATUS_CODES.CREATED) {
       throw new ResponseError(`Failed to create product`, {

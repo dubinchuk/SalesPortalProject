@@ -9,14 +9,17 @@ export class RequestApi {
   private response!: APIResponse;
   constructor(private reporter = new AllureReporter()) {}
 
-  async send<T extends IResponseFields>(options: IRequestOptions): Promise<IResponse<T>> {
+  async send<T extends IResponseFields>(
+    options: IRequestOptions,
+    expectError?: boolean,
+  ): Promise<IResponse<T>> {
     try {
       const requestContext = await request.newContext({
         baseURL: options.baseURL ?? apiConfig.baseUrl,
       });
       this.response = await requestContext.fetch(options.url, _.omit(options, ['baseURL', 'url']));
       const responseData = await this.transormReponse();
-      await this.reporter.logApiCall(options, responseData);
+      await this.reporter.logApiCall(options, responseData, expectError);
 
       if (this.response.status() >= 500)
         throw new Error('Request failed with status ' + this.response.status());

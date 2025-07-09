@@ -1,70 +1,81 @@
 import { apiConfig } from '../../config/apiConfig';
+import { IRequestOptions } from '../../data/types/api.types';
 import { ICustomer, ICustomerResponse } from '../../data/types/customers.types';
 import { RequestApi } from '../../utils/apiClients/request';
 import { logStep } from '../../utils/report/decorator';
 
 export class CustomerApiClient {
-  constructor(private request = new RequestApi()) {}
+  constructor(private apiClient = new RequestApi()) {}
 
   @logStep('Create customer via API')
-  async create(body: ICustomer, token: string) {
-    return await this.request.send<ICustomerResponse>({
+  async create(customer: ICustomer, token: string, expectError: boolean = false) {
+    const options: IRequestOptions = {
       url: apiConfig.endpoints.Customers,
       method: 'post',
-      data: body,
+      data: customer,
       headers: {
         'content-type': 'application/json',
         Authorization: token,
       },
-    });
+    };
+
+    return this.apiClient.send<ICustomerResponse>(options, expectError);
   }
 
   @logStep('Get customer via API')
   async getById(id: string, token: string) {
-    return await this.request.send<ICustomerResponse>({
+    const options: IRequestOptions = {
       url: apiConfig.endpoints['Get Customer By Id'](id),
       method: 'get',
       headers: {
         'content-type': 'application/json',
         Authorization: token,
       },
-    });
+    };
+
+    return await this.apiClient.send<ICustomerResponse>(options);
   }
 
   @logStep('Get all customers via API')
   async getAll(token: string) {
-    return await this.request.send<ICustomerResponse>({
+    const options: IRequestOptions = {
       url: apiConfig.endpoints.Customers,
       method: 'get',
       headers: {
         'content-type': 'application/json',
         Authorization: token,
       },
-    });
+    };
+
+    return await this.apiClient.send<ICustomerResponse>(options);
   }
 
   @logStep('Update customer via API')
-  async update(data: ICustomer & { _id: string }, token: string) {
-    return await this.request.send<ICustomerResponse>({
+  async update(customer: ICustomer & { _id: string }, token: string) {
+    const options: IRequestOptions = {
       url: apiConfig.endpoints.Customers,
       method: 'put',
       headers: {
         'content-type': 'application/json',
         Authorization: token,
       },
-      data: data,
-    });
+      data: customer,
+    };
+
+    return await this.apiClient.send<ICustomerResponse>(options);
   }
 
   @logStep('Delete customer via API')
   async delete(id: string, token: string) {
-    return await this.request.send<ICustomerResponse>({
+    const options: IRequestOptions = {
       url: apiConfig.endpoints.Customers + `/${id}`,
       method: 'delete',
       headers: {
         'content-type': 'application/json',
         Authorization: token,
       },
-    });
+    };
+
+    return await this.apiClient.send<ICustomerResponse>(options);
   }
 }
