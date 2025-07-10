@@ -1,18 +1,32 @@
+import { CUSTOM_API_ERRORS } from '../../data/errors/apiErrors';
 import { test, expect } from '../../fixtures/services.fixtures';
 
 test.describe('[API] Products', async function () {
-  test('Create product', async function ({ product }) {
-    await product.createAndValidate();
-    await product.delete();
+  test.describe('Create', () => {
+    test.afterEach(async function ({ product }) {
+      await product.delete();
+    });
+
+    test('Create product', async function ({ product }) {
+      await product.createAndValidate();
+    });
+
+    test('Fail to create product', async function ({ product }) {
+      try {
+        await product.createAndValidate({ name: '' }, true);
+      } catch (err) {
+        expect((err as Error).message).toBe(CUSTOM_API_ERRORS.PRODUCT.CREATE_FAILED);
+      }
+    });
   });
 
-  test('Fail to create product', async function ({ product }) {
-    try {
-      await product.create({ name: '' }, true);
-    } catch (err) {
-      expect((err as Error).message).toBe(
-        'Failed to create product - Status code: 400, IsSuccess: false, ErrorMessage: Incorrect request body',
-      );
-    }
+  test.describe('Delete', async function () {
+    test.beforeEach(async function ({ product }) {
+      await product.createAndValidate();
+    });
+
+    test('Delete product', async function ({ product }) {
+      await product.deleteAndValidate();
+    });
   });
 });
