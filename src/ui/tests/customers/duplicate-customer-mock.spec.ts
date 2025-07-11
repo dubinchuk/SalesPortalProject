@@ -1,8 +1,10 @@
 import { mergeTests } from '@playwright/test';
+import { Severity } from 'allure-js-commons';
 
 import { test as servicesTest } from '../../../fixtures/services.fixtures';
 import { test as mockTest } from '../../../fixtures/mock.fixtures';
 import { generateNewCustomer } from '../../../data/customers/generateCustomer';
+import { setMetadata } from '../../../utils/report/testMetadata';
 
 const test = mergeTests(mockTest, servicesTest);
 
@@ -16,6 +18,7 @@ test.describe('[UI] [Customers]', async function () {
     customersPageService,
     customersMockService,
   }) {
+    setMetadata(Severity.NORMAL);
     const customer = generateNewCustomer();
     await homePageService.openCustomersPage();
     await customersPageService.openAddNewCustomerPage();
