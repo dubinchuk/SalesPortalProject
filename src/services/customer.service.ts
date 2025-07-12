@@ -1,10 +1,19 @@
 import { ICustomer, ICustomerFromResponse, ICustomerResponse } from '../data/types/customers.types';
 import { CustomerApiClient } from '../api/clients/customers.client';
 import { generateNewCustomer } from '../data/customers/generateCustomer';
-import { IResponse, STATUS_CODES } from '../data/types/api.types';
+import {
+  ErrorResponseCause,
+  IResponse,
+  IResponseFields,
+  STATUS_CODES,
+} from '../data/types/api.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
-import { validateResponse, validateSchema } from '../utils/validation/response';
-import { createdCustomerSchema } from '../data/schema/customer.schema';
+import {
+  validateResponseBody,
+  validateResponseStatus,
+  validateSchema,
+} from '../utils/validation/response';
+import { createdCustomerSchema } from '../data/schema/customers/customer.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -17,57 +26,22 @@ export class Customer {
   }
 
   //TODO: добавить возможность работы с несколькими кастомерами
-  async create(customCustomerData?: Partial<ICustomer>) {
+  async create(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
     const customerData = generateNewCustomer(customCustomerData);
     const token = await this.signInService.getToken();
-    const response = await this.service.create(customerData, token);
+    const response = await this.service.create(customerData, token, expectError);
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create customer`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
+    this.validateCreateCustomerResponseStatus(response);
 
     this.setSettings(response.body.Customer);
-    return this.getSettings();
+    return { response, customerData };
   }
 
-  async createAndValidate(customCustomerData?: Partial<ICustomer>) {
-    const customerData = generateNewCustomer(customCustomerData);
-    const token = await this.signInService.getToken();
-    const response = await this.service.create(customerData, token);
+  async createAndValidate(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
+    const { response, customerData } = await this.create(customCustomerData, expectError);
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create customer`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
-
-    this.setSettings(response.body.Customer);
-
-    this.validateCreatedCustomerResponse(response, customerData);
-    this.validateCreatedCustomerSchema(response);
-
-    return this.getSettings();
-  }
-
-  validateCreatedCustomerResponse(response: IResponse<ICustomerResponse>, customerData: ICustomer) {
-    validateResponse<ICustomerResponse>(
-      response,
-      STATUS_CODES.CREATED,
-      true,
-      null,
-      customerData,
-      'Customer',
-    );
-  }
-
-  validateCreatedCustomerSchema(response: IResponse<ICustomerResponse>) {
-    validateSchema<ICustomerResponse>(response, createdCustomerSchema);
+    this.validateCreateCustomerResponseBody(response, customerData);
+    this.validateCreateCustomerSchema(response);
   }
 
   createFromExisting(customer: ICustomerFromResponse) {
@@ -99,13 +73,17 @@ export class Customer {
   }
 
   async delete() {
+    if (!this.settings) return;
     const token = await this.signInService.getToken();
     const response = await this.service.delete(this.getSettings()._id, token);
-    if (response.status !== STATUS_CODES.DELETED) {
-      throw new DeleteResponseError('Failed to delete customer', {
-        status: response.status,
-      });
-    }
+    this.validateDeleteCustomerResponseStatus(response);
+
+    return response;
+  }
+
+  async deleteAndValidate() {
+    const response = await this.delete();
+    if (response) this.validateDeleteCustomerResponseBody(response);
   }
 
   async getLatest() {
@@ -131,5 +109,50 @@ export class Customer {
       });
     }
     this.setSettings(response.body.Customer);
+  }
+
+  validateCreateCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData?: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  validateCreateCustomerResponseStatus(response: IResponse<ICustomerResponse>) {
+    validateResponseStatus<ICustomerResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.CREATED,
+      ResponseError,
+      'Failed to create customer',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateDeleteCustomerResponseBody(response: IResponse<IResponseFields>) {
+    validateResponseBody<IResponseFields, ICustomer>(response, true, null);
+  }
+
+  validateDeleteCustomerResponseStatus(response: IResponse<IResponseFields>) {
+    validateResponseStatus<IResponseFields, { status: number }>(
+      response,
+      STATUS_CODES.DELETED,
+      DeleteResponseError,
+      'Failed to delete customer',
+      { status: response.status },
+    );
+  }
+
+  validateCreateCustomerSchema(response: IResponse<ICustomerResponse>) {
+    validateSchema<ICustomerResponse>(response, createdCustomerSchema);
   }
 }

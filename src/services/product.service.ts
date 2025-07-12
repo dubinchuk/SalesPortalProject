@@ -3,10 +3,19 @@ import moment from 'moment';
 import { ProductsApiClient } from '../api/clients/products.client';
 import { IProduct, IProductFromResponse, IProductResponse } from '../data/types/product.types';
 import { generateNewProduct } from '../data/products/generateProduct';
-import { IResponse, STATUS_CODES } from '../data/types/api.types';
+import {
+  ErrorResponseCause,
+  IResponse,
+  IResponseFields,
+  STATUS_CODES,
+} from '../data/types/api.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
-import { validateResponse, validateSchema } from '../utils/validation/response';
-import { createdProductSchema } from '../data/schema/product.schema';
+import {
+  validateResponseBody,
+  validateResponseStatus,
+  validateSchema,
+} from '../utils/validation/response';
+import { createdProductSchema } from '../data/schema/products/product.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -24,51 +33,17 @@ export class Product {
     const token = await this.signInService.getToken();
     const response = await this.service.create(productData, token, expectError);
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create product`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
-
+    this.validateCreateProductResponseStatus(response);
     this.setSettings(response.body.Product);
-    return this.getSettings();
+
+    return { response, productData };
   }
 
-  async createAndValidate(customProductData?: Partial<IProduct>) {
-    const productData = generateNewProduct(customProductData);
-    const token = await this.signInService.getToken();
-    const response = await this.service.create(productData, token);
+  async createAndValidate(customProductData?: Partial<IProduct>, expectError?: boolean) {
+    const { response, productData } = await this.create(customProductData, expectError);
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create product`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
-
-    this.setSettings(response.body.Product);
-
-    this.validateCreateProductResponse(response, productData);
+    this.validateCreateProductResponseBody(response, productData);
     this.validateCreatedProductSchema(response);
-
-    return this.getSettings();
-  }
-
-  validateCreateProductResponse(response: IResponse<IProductResponse>, productData: IProduct) {
-    validateResponse<IProductResponse>(
-      response,
-      STATUS_CODES.CREATED,
-      true,
-      null,
-      productData,
-      'Product',
-    );
-  }
-  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
-    validateSchema<IProductResponse>(response, createdProductSchema);
   }
 
   createFromExisting(product: IProductFromResponse) {
@@ -96,13 +71,17 @@ export class Product {
   }
 
   async delete() {
+    if (!this.settings) return;
     const token = await this.signInService.getToken();
     const response = await this.service.delete(this.getSettings()._id, token);
-    if (response.status !== STATUS_CODES.DELETED) {
-      throw new DeleteResponseError(`Failed to delete product`, {
-        status: response.status,
-      });
-    }
+    this.validateDeleteProductResponseStatus(response);
+
+    return response;
+  }
+
+  async deleteAndValidate() {
+    const response = await this.delete();
+    if (response) this.validateDeleteProductResponseBody(response);
   }
 
   async getLatest() {
@@ -130,5 +109,50 @@ export class Product {
       });
     }
     this.setSettings(response.body.Product);
+  }
+
+  validateCreateProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  validateCreateProductResponseStatus(response: IResponse<IProductResponse>) {
+    validateResponseStatus<IProductResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.CREATED,
+      ResponseError,
+      'Failed to create product',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
+    validateSchema<IProductResponse>(response, createdProductSchema);
+  }
+
+  validateDeleteProductResponseBody(response: IResponse<IResponseFields>) {
+    validateResponseBody(response, true, null);
+  }
+
+  validateDeleteProductResponseStatus(response: IResponse<IResponseFields>) {
+    validateResponseStatus<IResponseFields, { status: number }>(
+      response,
+      STATUS_CODES.DELETED,
+      DeleteResponseError,
+      'Failed to create product',
+      { status: response.status },
+    );
   }
 }

@@ -10,8 +10,6 @@ import { Product } from '../../services/product.service';
 import { logStep } from '../../utils/report/decorator';
 import { SignInService } from '../../services/signIn.service';
 import { TOAST_MESSAGES } from '../../data/messages/messages';
-import { STATUS_CODES } from '../../data/types/api.types';
-import { ResponseError } from '../../utils/errors/errors';
 
 import { SalesPortalPageService } from './salesPortal.service';
 
@@ -42,14 +40,7 @@ export class ProductsPageService {
       this.addNewProductPage.clickOnSaveNewProductButton.bind(this.addNewProductPage),
     );
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create product`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
-
+    this.product.validateCreateProductResponseStatus(response);
     this.product.createFromExisting(response.body.Product);
     await this.addNewProductPage.waitForButtonSpinnerToHide();
     await this.productsListPage.waitForOpened();

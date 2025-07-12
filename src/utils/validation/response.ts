@@ -3,8 +3,9 @@ import addFormats from 'ajv-formats';
 import { expect } from '@playwright/test';
 import _ from 'lodash';
 
-import { IResponse } from '../../data/types/api.types';
+import { IResponse, STATUS_CODES } from '../../data/types/api.types';
 import { IResponseFields } from '../../data/types/api.types';
+import { CustomError } from '../errors/errors';
 
 export function validateSchema<T = object>(response: IResponse<T>, schema: object) {
   const ajv = new Ajv({ allErrors: true, strict: false });
@@ -23,16 +24,13 @@ export function validateSchema<T = object>(response: IResponse<T>, schema: objec
   expect(isValidSchema, message).toBe(true);
 }
 
-export function validateResponse<T extends object>(
+export function validateResponseBody<T extends object, U extends object>(
   response: IResponse<T>,
-  status: number,
   IsSuccess?: boolean,
   ErrorMessage?: null | string,
-  expectedBodyData?: object,
+  expectedBodyData?: U,
   targetKey?: keyof typeof response.body,
 ) {
-  validateResponseStatus(response, status);
-
   if (isResponseWithIsSuccessAndErrorMessage(response)) {
     expect.soft(response.body.IsSuccess, `Check IsSuccess to be ${IsSuccess}`).toBe(IsSuccess);
     expect
@@ -47,12 +45,16 @@ export function validateResponse<T extends object>(
   }
 }
 
-export function validateResponseStatus<T extends object>(
+export function validateResponseStatus<T, C>(
   response: IResponse<T>,
-  expectedStatus: number,
+  expectedStatus: STATUS_CODES,
+  ErrorClass: new (message: string, cause: C) => CustomError<C>,
+  message: string,
+  cause: C,
 ) {
-  const actualStatus = response.status;
-  expect(actualStatus, `Check response status to be ${expectedStatus}`).toBe(expectedStatus);
+  if (response.status !== expectedStatus) {
+    throw new ErrorClass(message, cause);
+  }
 }
 
 function isResponseWithIsSuccessAndErrorMessage(

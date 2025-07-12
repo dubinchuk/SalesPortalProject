@@ -17,8 +17,6 @@ import { Customer } from '../../services/customer.service.js';
 import { apiConfig } from '../../config/apiConfig.js';
 import { generateNewCustomer } from '../../data/customers/generateCustomer.js';
 import { SignInService } from '../../services/signIn.service.js';
-import { STATUS_CODES } from '../../data/types/api.types.js';
-import { ResponseError } from '../../utils/errors/errors.js';
 
 import { SalesPortalPageService } from './salesPortal.service.js';
 
@@ -57,14 +55,7 @@ export class CustomersPageService {
       this.save.bind(this),
     );
 
-    if (response.status !== STATUS_CODES.CREATED) {
-      throw new ResponseError(`Failed to create customer`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
-
+    this.customer.validateCreateCustomerResponseStatus(response);
     this.customer.createFromExisting(response.body.Customer);
     await this.addNewCustomerPage.waitForButtonSpinnerToHide();
     await this.customersListPage.waitForOpened();
