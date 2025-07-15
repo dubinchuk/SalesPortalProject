@@ -1,6 +1,9 @@
-import { test } from '../../../fixtures/services.fixtures';
+import { Severity } from 'allure-js-commons';
 
-test.describe('[UI] [Products]', async function () {
+import { test } from '../../../fixtures/services.fixtures';
+import { setMetadata } from '../../../utils/report/testMetadata';
+
+test.describe('[UI] [Products] Create', async function () {
   test.beforeEach(async function ({ signInService }) {
     await signInService.openSalesPortal();
   });
@@ -9,10 +12,11 @@ test.describe('[UI] [Products]', async function () {
     await productsPageService.delete();
   });
 
-  test('Create a new product with valid data', async function ({
+  test('@smoke Create product with valid data', async function ({
     productsPageService,
     homePageService,
   }) {
+    setMetadata(Severity.BLOCKER);
     await homePageService.openProductsPage();
     await productsPageService.openAddNewProductPage();
     await productsPageService.create();

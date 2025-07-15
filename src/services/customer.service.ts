@@ -1,4 +1,9 @@
-import { ICustomer, ICustomerFromResponse, ICustomerResponse } from '../data/types/customers.types';
+import {
+  ICustomer,
+  ICustomerFromResponse,
+  ICustomerResponse,
+  ICustomersResponse,
+} from '../data/types/customers.types';
 import { CustomerApiClient } from '../api/clients/customers.client';
 import { generateNewCustomer } from '../data/customers/generateCustomer';
 import {
@@ -14,6 +19,7 @@ import {
   validateSchema,
 } from '../utils/validation/response';
 import { createdCustomerSchema } from '../data/schema/customers/customer.schema';
+import { allCustomersSchema } from '../data/schema/customers/customers.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -89,25 +95,23 @@ export class Customer {
   async getLatest() {
     const token = await this.signInService.getToken();
     const response = await this.service.getById(this.getSettings()._id, token);
-    if (response.status !== STATUS_CODES.OK) {
-      throw new ResponseError('Failed to create customer', {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
+    this.validateGetCustomerResponseStatus(response);
+    this.validateGetCustomerResponseBody(response);
+  }
+
+  async getAll() {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getAll(token);
+    this.validateGetAllCustomersResponseStatus(response);
+    this.validateGetAllCustomersResponseBody(response);
+    this.validateAllCustomersSchema(response);
   }
 
   async edit(newCustomerSettings: ICustomer & { _id: string }) {
     const token = await this.signInService.getToken();
     const response = await this.service.update(newCustomerSettings, token);
-    if (response.status !== STATUS_CODES.OK) {
-      throw new ResponseError('Failed to create customer', {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
+    this.validateEditCustomerResponseStatus(response);
+    this.validateEditCustomerResponseBody(response);
     this.setSettings(response.body.Customer);
   }
 
@@ -152,7 +156,92 @@ export class Customer {
     );
   }
 
+  validateEditCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData?: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  validateEditCustomerResponseStatus(response: IResponse<ICustomerResponse>) {
+    validateResponseStatus<ICustomerResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to edit customer',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateGetCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData?: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  validateGetCustomerResponseStatus(response: IResponse<ICustomerResponse>) {
+    validateResponseStatus<ICustomerResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to get customer',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateGetAllCustomersResponseBody(
+    response: IResponse<ICustomersResponse>,
+    customerData?: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomersResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customers',
+    );
+  }
+
+  validateGetAllCustomersResponseStatus(response: IResponse<ICustomersResponse>) {
+    validateResponseStatus<ICustomersResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to get all customers',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
   validateCreateCustomerSchema(response: IResponse<ICustomerResponse>) {
     validateSchema<ICustomerResponse>(response, createdCustomerSchema);
+  }
+
+  validateAllCustomersSchema(response: IResponse<ICustomersResponse>) {
+    validateSchema<ICustomersResponse>(response, allCustomersSchema);
   }
 }

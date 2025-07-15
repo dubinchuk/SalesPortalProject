@@ -7,6 +7,7 @@ import { SignInService } from '../services/signIn.service';
 import { Product } from '../services/product.service';
 import { Customer } from '../services/customer.service';
 import { ProductsPageService } from '../ui/services/products.service';
+import { checkMetadataIsSet, resetMetadataFlag } from '../utils/report/testMetadata';
 
 interface ISalesPortalServices {
   customersPageService: CustomersPageService;
@@ -46,6 +47,14 @@ export const test = base.extend<ISalesPortalServices>({
   productsPageService: async ({ page, signInService }, use) => {
     await use(new ProductsPageService(page, signInService));
   },
+});
+
+test.beforeEach(async () => {
+  resetMetadataFlag();
+});
+
+test.afterEach(async () => {
+  checkMetadataIsSet();
 });
 
 export { expect } from '@playwright/test';
