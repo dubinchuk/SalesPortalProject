@@ -1,6 +1,6 @@
 import { apiConfig } from '../../config/apiConfig';
 import { IRequestOptions } from '../../data/types/api.types';
-import { ICustomer, ICustomerResponse } from '../../data/types/customers.types';
+import { ICustomer, ICustomerResponse, ICustomersResponse } from '../../data/types/customers.types';
 import { RequestApi } from '../../utils/apiClients/request';
 import { logStep } from '../../utils/report/decorator';
 
@@ -39,7 +39,7 @@ export class CustomerApiClient {
   @logStep('Get all customers via API')
   async getAll(token: string) {
     const options: IRequestOptions = {
-      url: apiConfig.endpoints.Customers,
+      url: apiConfig.endpoints['Get All Customers'],
       method: 'get',
       headers: {
         'content-type': 'application/json',
@@ -47,13 +47,13 @@ export class CustomerApiClient {
       },
     };
 
-    return await this.apiClient.send<ICustomerResponse>(options);
+    return await this.apiClient.send<ICustomersResponse>(options);
   }
 
   @logStep('Update customer via API')
   async update(customer: ICustomer & { _id: string }, token: string) {
     const options: IRequestOptions = {
-      url: apiConfig.endpoints.Customers,
+      url: apiConfig.endpoints['Get Customer By Id'](customer._id),
       method: 'put',
       headers: {
         'content-type': 'application/json',
@@ -68,7 +68,7 @@ export class CustomerApiClient {
   @logStep('Delete customer via API')
   async delete(id: string, token: string) {
     const options: IRequestOptions = {
-      url: apiConfig.endpoints.Customers + `/${id}`,
+      url: apiConfig.endpoints['Get Customer By Id'](id),
       method: 'delete',
       headers: {
         'content-type': 'application/json',

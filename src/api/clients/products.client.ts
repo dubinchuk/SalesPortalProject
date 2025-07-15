@@ -42,7 +42,7 @@ export class ProductsApiClient {
   async getAll(token: string) {
     const options: IRequestOptions = {
       baseURL: apiConfig.baseUrl,
-      url: apiConfig.endpoints.Products,
+      url: apiConfig.endpoints['Get All Products'],
       method: 'get',
       headers: {
         'Content-Type': 'application/json',
@@ -54,16 +54,16 @@ export class ProductsApiClient {
   }
 
   @logStep('Update product via API')
-  async update(data: IProduct & { _id: string }, token: string) {
+  async update(product: IProduct & { _id: string }, token: string) {
     const options: IRequestOptions = {
       baseURL: apiConfig.baseUrl,
-      url: apiConfig.endpoints.Products,
+      url: apiConfig.endpoints['Get Product By Id'](product._id),
       method: 'put',
       headers: {
         'Content-Type': 'application/json',
         Authorization: token,
       },
-      data: data,
+      data: product,
     };
 
     return await this.apiClient.send<IProductResponse>(options);

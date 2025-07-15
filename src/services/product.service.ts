@@ -1,7 +1,12 @@
 import moment from 'moment';
 
 import { ProductsApiClient } from '../api/clients/products.client';
-import { IProduct, IProductFromResponse, IProductResponse } from '../data/types/product.types';
+import {
+  IProduct,
+  IProductFromResponse,
+  IProductResponse,
+  IProductsResponse,
+} from '../data/types/product.types';
 import { generateNewProduct } from '../data/products/generateProduct';
 import {
   ErrorResponseCause,
@@ -16,6 +21,7 @@ import {
   validateSchema,
 } from '../utils/validation/response';
 import { createdProductSchema } from '../data/schema/products/product.schema';
+import { allProductsSchema } from '../data/schema/products/products.schema';
 
 import { SignInService } from './signIn.service';
 
@@ -87,27 +93,24 @@ export class Product {
   async getLatest() {
     const token = await this.signInService.getToken();
     const response = await this.service.getById(this.getSettings()._id, token);
-    if (response.status !== STATUS_CODES.OK) {
-      throw new ResponseError(`Failed to get product`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
+    this.validateGetProductResponseStatus(response);
     this.setSettings(response.body.Product);
     return response;
+  }
+
+  async getAll() {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getAll(token);
+    this.validateGetAllProductsResponseStatus(response);
+    this.validateGetAllProductsResponseBody(response);
+    this.validateAllProductsSchema(response);
   }
 
   async edit(newProductSettings: IProduct & { _id: string }) {
     const token = await this.signInService.getToken();
     const response = await this.service.update(newProductSettings, token);
-    if (response.status !== STATUS_CODES.OK) {
-      throw new ResponseError(`Failed to update product`, {
-        status: response.status,
-        IsSuccess: response.body.IsSuccess,
-        ErrorMessage: response.body.ErrorMessage,
-      });
-    }
+    this.validateEditProductResponseStatus(response);
+    this.validateEditProductResponseBody(response);
     this.setSettings(response.body.Product);
   }
 
@@ -138,10 +141,6 @@ export class Product {
     );
   }
 
-  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
-    validateSchema<IProductResponse>(response, createdProductSchema);
-  }
-
   validateDeleteProductResponseBody(response: IResponse<IResponseFields>) {
     validateResponseBody(response, true, null);
   }
@@ -154,5 +153,94 @@ export class Product {
       'Failed to create product',
       { status: response.status },
     );
+  }
+
+  validateEditProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  validateEditProductResponseStatus(response: IResponse<IProductResponse>) {
+    validateResponseStatus<IProductResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to edit product',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateGetProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  validateGetProductResponseStatus(response: IResponse<IProductResponse>) {
+    validateResponseStatus<IProductResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to get product',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateGetAllProductsResponseBody(
+    response: IResponse<IProductsResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductsResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Products',
+    );
+  }
+
+  validateGetAllProductsResponseStatus(response: IResponse<IProductsResponse>) {
+    validateResponseStatus<IProductsResponse, ErrorResponseCause>(
+      response,
+      STATUS_CODES.OK,
+      ResponseError,
+      'Failed to get all products',
+      {
+        status: response.status,
+        IsSuccess: response.body.IsSuccess,
+        ErrorMessage: response.body.ErrorMessage,
+      },
+    );
+  }
+
+  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
+    validateSchema<IProductResponse>(response, createdProductSchema);
+  }
+
+  validateAllProductsSchema(response: IResponse<IProductsResponse>) {
+    validateSchema<IProductsResponse>(response, allProductsSchema);
   }
 }

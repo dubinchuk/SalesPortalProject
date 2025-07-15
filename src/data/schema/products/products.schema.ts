@@ -35,19 +35,7 @@ export const allProductsSchema = {
         additionalProperties: false,
       },
     },
-    sorting: {
-      type: 'object',
-      properties: {
-        sortField: {
-          type: 'string',
-        },
-        sortOrder: {
-          type: 'string',
-        },
-      },
-      required: ['sortField', 'sortOrder'],
-      additionalProperties: false,
-    },
+
     IsSuccess: {
       type: 'boolean',
     },
@@ -55,5 +43,5 @@ export const allProductsSchema = {
       type: ['string', 'null'],
     },
   },
-  required: ['Products', 'sorting', 'IsSuccess', 'ErrorMessage'],
+  required: ['Products', 'IsSuccess', 'ErrorMessage'],
 };
