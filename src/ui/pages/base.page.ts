@@ -35,6 +35,13 @@ export class BasePage {
     return element;
   }
 
+  protected async waitForElementToBeDetached(
+    locator: LocatorOrSelector,
+    timeout = DEFAULT_TIMEOUT,
+  ) {
+    await this.waitForElement(locator, 'detached', timeout);
+  }
+
   protected async waitForSpinnerToHide(
     spinnerOrSpinners: LocatorOrSelector | LocatorOrSelector[],
     skipVisibilityCheck: boolean = true,
@@ -108,11 +115,13 @@ export class BasePage {
   async interceptResponse<T>(
     url: string,
     triggerAction: () => Promise<void>,
-  ): Promise<IResponse<T>> {
+  ): Promise<IResponse<T | null>> {
     const [response] = await Promise.all([this.page.waitForResponse(url), triggerAction()]);
+    const status = response.status();
+
     return {
-      body: (await response.json()) as T,
-      status: response.status(),
+      body: status === 204 ? null : ((await response.json()) as T),
+      status,
       headers: response.headers(),
     };
   }

@@ -12,8 +12,10 @@ export class CustomersListPage extends SalesPortalPage {
     this.findElement(`${this['Table row selector'](email)}/td[2]`);
   private readonly 'Country by table row' = (email: string) =>
     this.findElement(`${this['Table row selector'](email)}/td[3]`);
+  private readonly 'Details button by table row' = (email: string) =>
+    this.findElement(`${this['Table row selector'](email)}//a[@title="Details"]`);
   private readonly 'Edit button by table row' = (email: string) =>
-    this.findElement(`${this['Table row selector'](email)}//button[@title="Edit"]`);
+    this.findElement(`${this['Table row selector'](email)}//a[@title="Edit"]`);
   private readonly 'Delete button by table row' = (email: string) =>
     this.findElement(`${this['Table row selector'](email)}//button[@title="Delete"]`);
 
@@ -30,6 +32,14 @@ export class CustomersListPage extends SalesPortalPage {
       this.getText(this['Country by table row'](email)),
     ]);
     return { email, name, country };
+  }
+
+  async waitForCustomerToDetached(email: string) {
+    try {
+      await this.waitForElementToBeDetached(this['Table row selector'](email));
+    } catch {
+      throw new Error(`Deleted customer with email ${email} was found in table`);
+    }
   }
 
   private async getColumnData(columnName: CUSTOMERS_COLUMN_NAME) {
@@ -62,6 +72,10 @@ export class CustomersListPage extends SalesPortalPage {
 
   async clickOnDeleteCustomer(email: string) {
     await this.click(this['Delete button by table row'](email));
+  }
+
+  async clickOnCustomerDetails(email: string) {
+    await this.click(this['Details button by table row'](email));
   }
 
   async getEmptyTableMessage() {

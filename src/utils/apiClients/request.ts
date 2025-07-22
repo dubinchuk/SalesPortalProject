@@ -18,7 +18,7 @@ export class RequestApi {
         baseURL: options.baseURL ?? apiConfig.baseUrl,
       });
       this.response = await requestContext.fetch(options.url, _.omit(options, ['baseURL', 'url']));
-      const responseData = await this.transormReponse();
+      const responseData = await this.transformReponse();
       await this.reporter.logApiCall(options, responseData, expectError);
 
       if (this.response.status() >= 500)
@@ -29,18 +29,22 @@ export class RequestApi {
     }
   }
 
-  private async transormReponse() {
+  private async transformReponse() {
     const contentType = this.response.headers()['content-type'] || '';
+    const status = this.response.status();
 
     let body;
-    if (contentType.includes('application/json')) {
+
+    if (status === 204) {
+      body = null;
+    } else if (contentType.includes('application/json')) {
       body = await this.response.json();
     } else {
       body = await this.response.text();
     }
 
     return {
-      status: this.response.status(),
+      status,
       body,
       headers: this.response.headers(),
     };

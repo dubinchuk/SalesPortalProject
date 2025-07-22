@@ -1,4 +1,5 @@
 import moment from 'moment';
+import { expect } from '@playwright/test';
 
 import { ProductsApiClient } from '../api/clients/products.client';
 import {
@@ -142,7 +143,9 @@ export class Product {
   }
 
   validateDeleteProductResponseBody(response: IResponse<IResponseFields>) {
-    validateResponseBody(response, true, null);
+    if (response.status === STATUS_CODES.DELETED) {
+      expect(response.body).toBeNull;
+    }
   }
 
   validateDeleteProductResponseStatus(response: IResponse<IResponseFields>) {

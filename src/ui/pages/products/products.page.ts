@@ -16,9 +16,9 @@ export class ProductsListPage extends SalesPortalPage {
   readonly 'Actions by product name' = (productName: string) =>
     `${this['Table row selector'](productName)}/td[5]`;
   readonly 'Details button by product name' = (productName: string) =>
-    `${this['Actions by product name'](productName)}/button[@title="Details"]`;
+    `${this['Actions by product name'](productName)}/a[@title="Details"]`;
   readonly 'Edit button by product name' = (productName: string) =>
-    `${this['Actions by product name'](productName)}/button[@title="Edit"]`;
+    `${this['Actions by product name'](productName)}/a[@title="Edit"]`;
   readonly 'Delete button by product name' = (productName: string) =>
     `${this['Actions by product name'](productName)}/button[@title="Delete"]`;
 
@@ -26,16 +26,24 @@ export class ProductsListPage extends SalesPortalPage {
     await this.click(this['Add new product button']);
   }
 
-  async openProductDetails(productName: string) {
+  async clickOnProductDetails(productName: string) {
     await this.click(this['Details button by product name'](productName));
   }
 
-  async openEditProductPage(productName: string) {
+  async clickOnEditProduct(productName: string) {
     await this.click(this['Edit button by product name'](productName));
   }
 
-  async openDeleteProduct(productName: string) {
+  async clickOnDeleteProduct(productName: string) {
     await this.click(this['Delete button by product name'](productName));
+  }
+
+  async waitForProductToDetached(productName: string) {
+    try {
+      await this.waitForElementToBeDetached(this['Table row selector'](productName));
+    } catch {
+      throw new Error(`Deleted product with name ${productName} was found in table`);
+    }
   }
 
   async getDataByName(name: string) {
