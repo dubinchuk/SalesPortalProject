@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test';
+
 import {
   ICustomer,
   ICustomerFromResponse,
@@ -142,8 +144,10 @@ export class Customer {
     );
   }
 
-  validateDeleteCustomerResponseBody(response: IResponse<IResponseFields>) {
-    validateResponseBody<IResponseFields, ICustomer>(response, true, null);
+  validateDeleteCustomerResponseBody(response: IResponse<IResponseFields | null>) {
+    if (response.status === STATUS_CODES.DELETED) {
+      expect(response.body).toBeNull();
+    }
   }
 
   validateDeleteCustomerResponseStatus(response: IResponse<IResponseFields>) {

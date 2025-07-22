@@ -8,6 +8,7 @@ export abstract class SalesPortalPage extends BasePage {
   private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
   private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
+  private readonly 'Overlay spinner' = this.findElement('.overlay-spinner .spinner-border');
   private readonly headerMenuElement = (
     itemName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers',
   ) => `//a[contains(@class, 'justify-content-start')]/text()[.='${itemName}']`;
@@ -29,6 +30,11 @@ export abstract class SalesPortalPage extends BasePage {
   @logStep('Wait for table spinner to hide')
   async waitForTableSpinnerToHide() {
     await this.waitForSpinnerToHide(this['Table spinner']);
+  }
+
+  @logStep('Wait for overlay spinner to hide')
+  async waitForOverlaySpinnerToHide() {
+    await this.waitForSpinnerToHide(this['Overlay spinner']);
   }
 
   async getToastMessage() {

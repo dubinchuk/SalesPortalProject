@@ -62,3 +62,11 @@ function isResponseWithIsSuccessAndErrorMessage(
 ): response is IResponse<IResponseFields> {
   return 'IsSuccess' in response && 'ErrorMessage' in response;
 }
+
+export function ensureResponseBody<T>(
+  response: IResponse<T | null>,
+): asserts response is IResponse<T> {
+  if (!response.body) {
+    throw new Error('Response body is null');
+  }
+}

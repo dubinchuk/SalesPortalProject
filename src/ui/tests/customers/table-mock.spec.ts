@@ -10,7 +10,7 @@ import { setMetadata } from '../../../utils/report/testMetadata';
 
 const test = mergeTests(mockTest, servicesTest);
 
-test.describe('[UI] [Customers] Smoke', async function () {
+test.describe('[UI] [Customers]', async function () {
   test.beforeEach(async function ({ signInPageService }) {
     await signInPageService.openSalesPortal();
   });

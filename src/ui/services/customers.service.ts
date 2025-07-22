@@ -16,7 +16,11 @@ import { logStep } from '../../utils/report/decorator.js';
 import { Customer } from '../../services/customer.service.js';
 import { apiConfig } from '../../config/apiConfig.js';
 import { generateNewCustomer } from '../../data/customers/generateCustomer.js';
-import { SignInService } from '../../services/signIn.service.js';
+import { CustomerDetailsPage } from '../pages/customers/customerDetails.page.js';
+import { EditCustomerPage } from '../pages/customers/editCustomer.page.js';
+import { DeleteCustomerModalPage } from '../pages/customers/deleteCustomerModal.page.js';
+import { IResponse, IResponseFields } from '../../data/types/api.types.js';
+import { ensureResponseBody } from '../../utils/validation/response.js';
 
 import { SalesPortalPageService } from './salesPortal.service.js';
 
@@ -25,12 +29,18 @@ export class CustomersPageService {
   protected addNewCustomerPage: AddNewCustomerPage;
   private customer: Customer;
   private salesPortalService: SalesPortalPageService;
+  private customerDetailsPage: CustomerDetailsPage;
+  private editCustomerPage: EditCustomerPage;
+  private deleteCustomerModalPage: DeleteCustomerModalPage;
 
-  constructor(page: Page, signInService: SignInService) {
+  constructor(page: Page, customer: Customer) {
     this.customersListPage = new CustomersListPage(page);
     this.addNewCustomerPage = new AddNewCustomerPage(page);
-    this.customer = new Customer(signInService);
+    this.customer = customer;
     this.salesPortalService = new SalesPortalPageService(page);
+    this.customerDetailsPage = new CustomerDetailsPage(page);
+    this.editCustomerPage = new EditCustomerPage(page);
+    this.deleteCustomerModalPage = new DeleteCustomerModalPage(page);
   }
 
   private columnKeyMap: Record<CUSTOMERS_COLUMN_NAME, keyof ICustomersTable> = {
@@ -46,6 +56,25 @@ export class CustomersPageService {
     await this.addNewCustomerPage.waitForOpened();
   }
 
+  @logStep('Open View customer details')
+  async openCustomerDetails(email: string) {
+    await this.customersListPage.clickOnCustomerDetails(email);
+    await this.customerDetailsPage.waitForOpened();
+  }
+
+  @logStep('Open Delete customer modal page')
+  async openDeleteCustomer(email: string) {
+    await this.customersListPage.clickOnDeleteCustomer(email);
+    await this.deleteCustomerModalPage.waitForOpened();
+  }
+
+  @logStep('Open Edit Customer from Customers list')
+  async openEditCustomer(email: string) {
+    await this.customersListPage.clickOnEditCustomer(email);
+    await this.editCustomerPage.waitForOverlaySpinnerToHide();
+    await this.editCustomerPage.waitForOpened();
+  }
+
   @logStep('Create customer')
   async create(customCustomerData?: ICustomer) {
     await this.populateCustomer(customCustomerData);
@@ -55,6 +84,7 @@ export class CustomersPageService {
       this.save.bind(this),
     );
 
+    ensureResponseBody(response);
     this.customer.validateCreateCustomerResponseStatus(response);
     this.customer.createFromExisting(response.body.Customer);
     await this.addNewCustomerPage.waitForButtonSpinnerToHide();
@@ -64,9 +94,10 @@ export class CustomersPageService {
     await this.checkCustomerInTable();
   }
 
-  async populateCustomer(customCustomerData?: ICustomer) {
+  async populateCustomer(customCustomerData?: ICustomer, isAddPage: boolean = true) {
     const data = customCustomerData ?? generateNewCustomer();
-    await this.addNewCustomerPage.fillCustomerInputs(data);
+    const formPage = isAddPage ? this.addNewCustomerPage : this.editCustomerPage;
+    await formPage.fillCustomerInputs(data);
     return data;
   }
 
@@ -77,6 +108,35 @@ export class CustomersPageService {
   @logStep('Delete customer')
   async delete() {
     await this.customer.delete();
+  }
+
+  @logStep('Delete customer from customers list page')
+  async deleteFromCustomersList(email: string) {
+    await this.openDeleteCustomer(email);
+    await this.deleteInModalPage();
+  }
+
+  @logStep('Delete customer from edit customer page')
+  async deleteCustomerFromEdit() {
+    await this.editCustomerPage.clickOnDeleteButton();
+    await this.deleteInModalPage();
+  }
+
+  @logStep('Delete customer in modal page')
+  private async deleteInModalPage() {
+    const responseUrl =
+      apiConfig.baseUrl +
+      apiConfig.endpoints['Get Customer By Id'](this.customer.getSettings()._id);
+    const response = await this.deleteCustomerModalPage.interceptResponse<IResponseFields>(
+      responseUrl,
+      this.confirmDeleteCustomer.bind(this),
+    );
+
+    this.customer.validateDeleteCustomerResponseStatus(response as IResponse<ICustomerResponse>);
+    await this.deleteCustomerModalPage.waitForButtonSpinnerToHide();
+    await this.customersListPage.waitForOpened();
+    await this.validateCustomerDeletedMessage();
+    await this.checkCustomerNotInTable();
   }
 
   async validateCustomerExistsToastMessage(customer: ICustomer) {
@@ -159,6 +219,22 @@ export class CustomersPageService {
     );
   }
 
+  @logStep('Validate customer updated message')
+  async validateCustomerUpdatedMessage() {
+    await this.salesPortalService.validateToastMessageAndClose(
+      this.customersListPage,
+      TOAST_MESSAGES.CUSTOMER.UPDATED,
+    );
+  }
+
+  @logStep('Validate customer deleted message')
+  async validateCustomerDeletedMessage() {
+    await this.salesPortalService.validateToastMessageAndClose(
+      this.customersListPage,
+      TOAST_MESSAGES.CUSTOMER.DELETED,
+    );
+  }
+
   //TODO вынести общий метод в SalesPortalService
   @logStep('Validate empty customers table')
   async validateEmptyTable(message?: string) {
@@ -171,5 +247,45 @@ export class CustomersPageService {
     const expectedCustomer = customerData ?? this.customer.getSettings();
     const actualCustomer = await this.customersListPage.getDataByEmail(expectedCustomer.email);
     expect(actualCustomer).toEqual(_.pick(expectedCustomer, 'email', 'name', 'country'));
+  }
+
+  @logStep('Check customer not in table')
+  async checkCustomerNotInTable(email?: string) {
+    const customerEmail = email ?? this.customer.getSettings().email;
+    await this.customersListPage.waitForCustomerToDetached(customerEmail);
+  }
+
+  @logStep('Open Edit customer from View Details modal page')
+  async openEditCustomerFromDetails() {
+    await this.customerDetailsPage.clickOnEditCustomer();
+    await this.editCustomerPage.waitForOpened();
+  }
+
+  @logStep('Update customer')
+  async update(customCustomerData?: ICustomer) {
+    const settings = this.customer.getSettings();
+    await this.populateCustomer(customCustomerData, false);
+    const responseUrl = apiConfig.baseUrl + apiConfig.endpoints['Get Customer By Id'](settings._id);
+    const response = await this.editCustomerPage.interceptResponse<ICustomerResponse>(
+      responseUrl,
+      this.saveCustomerChanges.bind(this),
+    );
+
+    ensureResponseBody(response);
+    this.customer.validateEditCustomerResponseStatus(response);
+    this.customer.createFromExisting(response.body.Customer);
+    await this.editCustomerPage.waitForButtonSpinnerToHide();
+    await this.customersListPage.waitForOpened();
+    await this.customersListPage.waitForTableSpinnerToHide();
+    await this.validateCustomerUpdatedMessage();
+    await this.checkCustomerInTable();
+  }
+
+  async saveCustomerChanges() {
+    await this.editCustomerPage.clickOnSaveButton();
+  }
+
+  async confirmDeleteCustomer() {
+    await this.deleteCustomerModalPage.clickOnDeleteCustomer();
   }
 }
