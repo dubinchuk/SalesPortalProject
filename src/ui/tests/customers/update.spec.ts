@@ -14,7 +14,7 @@ test.describe('[UI] [Customers] Update', async function () {
     await customersPageService.delete();
   });
 
-  test('@smoke Update customer with valid data', async function ({
+  test('Update customer with valid data @smoke', async function ({
     customersPageService,
     customer,
   }) {

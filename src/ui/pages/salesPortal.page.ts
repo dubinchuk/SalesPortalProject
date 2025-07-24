@@ -9,6 +9,7 @@ export abstract class SalesPortalPage extends BasePage {
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
   private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
   private readonly 'Overlay spinner' = this.findElement('.overlay-spinner .spinner-border');
+  private readonly 'Active modal window' = this.findElement('.modal-open');
   private readonly headerMenuElement = (
     itemName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers',
   ) => `//a[contains(@class, 'justify-content-start')]/text()[.='${itemName}']`;
@@ -46,5 +47,10 @@ export abstract class SalesPortalPage extends BasePage {
   async closeToastMessage() {
     await this.click(this['Close toast button']);
     await this.waitForElement(this['Toast message'], 'hidden');
+  }
+
+  @logStep('Wait for modal window to close')
+  async waitForModalToClose() {
+    await this.waitForElementToBeDetached(this['Active modal window']);
   }
 }

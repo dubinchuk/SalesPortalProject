@@ -10,7 +10,7 @@ test.describe('[API] [Products] Create', async function () {
     await product.delete();
   });
 
-  test('Create product', async function ({ product }) {
+  test('Create product @smoke', async function ({ product }) {
     setMetadata(Severity.BLOCKER);
     await product.createAndValidate();
   });
@@ -30,7 +30,7 @@ test.describe('[API] [Products] Delete', async function () {
     await product.createAndValidate();
   });
 
-  test('Delete created product', async function ({ product }) {
+  test('Delete created product @smoke', async function ({ product }) {
     setMetadata(Severity.NORMAL);
     await product.deleteAndValidate();
   });
@@ -45,7 +45,7 @@ test.describe('[API] [Products] Get', async function () {
     await product.delete();
   });
 
-  test('Get created product', async function ({ product }) {
+  test('Get created product @smoke', async function ({ product }) {
     setMetadata(Severity.CRITICAL);
     await product.getLatest();
   });
@@ -67,7 +67,7 @@ test.describe('[API] [Products] Edit', async function () {
     await product.delete();
   });
 
-  test('Edit created product', async function ({ product }) {
+  test('Edit created product @smoke', async function ({ product }) {
     setMetadata(Severity.CRITICAL);
     const newProduct = generateNewProduct();
     await product.edit({ ...newProduct, _id: product.getSettings()._id });

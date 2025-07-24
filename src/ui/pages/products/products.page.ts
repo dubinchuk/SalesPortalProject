@@ -16,7 +16,7 @@ export class ProductsListPage extends SalesPortalPage {
   readonly 'Actions by product name' = (productName: string) =>
     `${this['Table row selector'](productName)}/td[5]`;
   readonly 'Details button by product name' = (productName: string) =>
-    `${this['Actions by product name'](productName)}/a[@title="Details"]`;
+    `${this['Actions by product name'](productName)}/button[@title="Details"]`;
   readonly 'Edit button by product name' = (productName: string) =>
     `${this['Actions by product name'](productName)}/a[@title="Edit"]`;
   readonly 'Delete button by product name' = (productName: string) =>
@@ -46,11 +46,17 @@ export class ProductsListPage extends SalesPortalPage {
     }
   }
 
-  async getDataByName(name: string) {
-    const [price, manufacturer] = await Promise.all([
+  async getProductByName(name: string) {
+    const [price, manufacturer, createdOn] = await Promise.all([
       this.getText(this['Price by product name'](name)),
       this.getText(this['Manufacturer by product name'](name)),
+      this.getText(this['Created by product name'](name)),
     ]);
-    return { name, price: +price.replace('$', ''), manufacturer };
+    return {
+      name,
+      price: +price.replace('$', ''),
+      manufacturer,
+      createdOn,
+    };
   }
 }

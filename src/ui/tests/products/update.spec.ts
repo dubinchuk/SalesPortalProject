@@ -14,9 +14,20 @@ test.describe('[UI] [Products] Update', async function () {
     await productsPageService.delete();
   });
 
-  test('@smoke Update product with valid data', async function ({ productsPageService, product }) {
+  test('Update product with valid data from products list @smoke', async function ({
+    productsPageService,
+  }) {
     setMetadata(Severity.CRITICAL);
-    await productsPageService.openEditProduct(product.getSettings().name);
+    await productsPageService.openEditProduct();
+    await productsPageService.update();
+  });
+
+  test('Update product with valid data from view details', async function ({
+    productsPageService,
+  }) {
+    setMetadata(Severity.CRITICAL);
+    await productsPageService.openProductDetails();
+    await productsPageService.openEditFromDetails();
     await productsPageService.update();
   });
 });

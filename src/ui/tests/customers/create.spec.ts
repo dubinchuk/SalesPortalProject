@@ -12,7 +12,7 @@ test.describe('[UI] [Customers] Create', async function () {
     await customersPageService.delete();
   });
 
-  test('@smoke Create customer with valid data', async function ({
+  test('Create customer with valid data @smoke', async function ({
     homePageService,
     customersPageService,
     customer,

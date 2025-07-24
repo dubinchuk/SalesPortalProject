@@ -9,7 +9,7 @@ test.describe('[UI] [Login]', async function () {
     await signInPageService.openSalesPortal();
   });
 
-  test('Login with valid credentials', async function ({ signInService }) {
+  test('Login with valid credentials @smoke', async function ({ signInService }) {
     setMetadata(Severity.BLOCKER);
     await signInService.signInAsAdminUI();
   });

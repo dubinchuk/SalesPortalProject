@@ -53,11 +53,14 @@ export class Product {
     this.validateCreatedProductSchema(response);
   }
 
-  createFromExisting(product: IProductFromResponse) {
+  createFromExisting(product: IProductFromResponse | undefined) {
+    if (!product) {
+      this.setSettings(undefined);
+    }
     this.setSettings(product);
   }
 
-  private setSettings(productSettings: IProductFromResponse) {
+  private setSettings(productSettings: IProductFromResponse | undefined) {
     this.settings = productSettings;
   }
 
