@@ -53,11 +53,14 @@ export class Product {
     this.validateCreatedProductSchema(response);
   }
 
-  createFromExisting(product: IProductFromResponse) {
+  createFromExisting(product: IProductFromResponse | undefined) {
+    if (!product) {
+      this.setSettings(undefined);
+    }
     this.setSettings(product);
   }
 
-  private setSettings(productSettings: IProductFromResponse) {
+  private setSettings(productSettings: IProductFromResponse | undefined) {
     this.settings = productSettings;
   }
 
@@ -67,13 +70,14 @@ export class Product {
   }
 
   getProductDataTransformedToDetails() {
+    const settings = this.getSettings();
     return {
-      name: this.getSettings().name,
-      amount: String(this.getSettings().amount),
-      price: String(this.getSettings().price),
-      createdOn: moment(this.getSettings().createdOn).format('LLL'),
-      manufacturer: this.getSettings().manufacturer,
-      notes: this.getSettings().notes,
+      name: settings.name,
+      amount: String(settings.amount),
+      price: String(settings.price),
+      createdOn: moment(settings.createdOn).format('LLL'),
+      manufacturer: settings.manufacturer,
+      notes: settings.notes,
     };
   }
 

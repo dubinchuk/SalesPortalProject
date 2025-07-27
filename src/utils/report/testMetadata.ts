@@ -1,5 +1,5 @@
 import { Severity } from 'allure-js-commons';
-import * as allure from 'allure-js-commons';
+import { allure } from 'allure-playwright';
 
 let metadataIsSet = false;
 

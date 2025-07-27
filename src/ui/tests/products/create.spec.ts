@@ -12,7 +12,7 @@ test.describe('[UI] [Products] Create', async function () {
     await productsPageService.delete();
   });
 
-  test('@smoke Create product with valid data', async function ({
+  test('Create product with valid data @smoke', async function ({
     productsPageService,
     homePageService,
   }) {

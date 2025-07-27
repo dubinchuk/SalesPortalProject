@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import moment from 'moment';
 
 import {
   ICustomer,
@@ -52,11 +53,14 @@ export class Customer {
     this.validateCreateCustomerSchema(response);
   }
 
-  createFromExisting(customer: ICustomerFromResponse) {
+  createFromExisting(customer: ICustomerFromResponse | undefined) {
+    if (!customer) {
+      this.setSettings(undefined);
+    }
     this.setSettings(customer);
   }
 
-  private setSettings(customerSettings: ICustomerFromResponse) {
+  private setSettings(customerSettings: ICustomerFromResponse | undefined) {
     this.settings = customerSettings;
   }
 
@@ -73,10 +77,11 @@ export class Customer {
       country: settings.country,
       city: settings.city,
       street: settings.street,
-      house: settings.house,
-      flat: settings.flat,
+      house: String(settings.house),
+      flat: String(settings.flat),
       phone: settings.phone,
       notes: settings.notes,
+      createdOn: moment(settings.createdOn).format('YYYY/MM/DD HH:mm:ss'),
     };
   }
 

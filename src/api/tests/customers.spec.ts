@@ -9,7 +9,7 @@ test.describe('[API] [Customers] Create', async function () {
     await customer.delete();
   });
 
-  test('Create customer with valid data', async function ({ customer }) {
+  test('Create customer with valid data @smoke', async function ({ customer }) {
     setMetadata(Severity.BLOCKER);
     await customer.createAndValidate();
   });
@@ -20,7 +20,7 @@ test.describe('[API] [Customers] Delete', async function () {
     await customer.createAndValidate();
   });
 
-  test('Delete created customer', async function ({ customer }) {
+  test('Delete created customer @smoke', async function ({ customer }) {
     setMetadata(Severity.NORMAL);
     await customer.delete();
   });
@@ -35,7 +35,7 @@ test.describe('[API] [Customers] Get', async function () {
     await customer.delete();
   });
 
-  test('Get created customer', async function ({ customer }) {
+  test('Get created customer @smoke', async function ({ customer }) {
     setMetadata(Severity.CRITICAL);
     await customer.getLatest();
   });
@@ -57,7 +57,7 @@ test.describe('[API] [Customers] Edit', async function () {
     await customer.delete();
   });
 
-  test('Edit created customer', async function ({ customer }) {
+  test('Edit created customer @smoke', async function ({ customer }) {
     setMetadata(Severity.CRITICAL);
     const newCustomer = generateNewCustomer();
     await customer.edit({ ...newCustomer, _id: customer.getSettings()._id });

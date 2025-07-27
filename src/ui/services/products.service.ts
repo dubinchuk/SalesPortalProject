@@ -1,10 +1,11 @@
 import { expect, Page } from '@playwright/test';
 import _ from 'lodash';
+import moment from 'moment';
 
 import { ProductsListPage } from '../pages/products/products.page';
 import { AddNewProductPage } from '../pages/products/addNewProduct.page';
 import { generateNewProduct } from '../../data/products/generateProduct';
-import { IProduct, IProductResponse } from '../../data/types/product.types';
+import { IProduct, IProductFromResponse, IProductResponse } from '../../data/types/product.types';
 import { apiConfig } from '../../config/apiConfig';
 import { Product } from '../../services/product.service';
 import { logStep } from '../../utils/report/decorator';
@@ -22,7 +23,7 @@ export class ProductsPageService {
   private addNewProductPage: AddNewProductPage;
   private product: Product;
   private salesPortalService: SalesPortalPageService;
-  private productDetailsPage: ProductDetailsModalPage;
+  private productDetailsModalPage: ProductDetailsModalPage;
   private editProductPage: EditProductPage;
   private deleteProductModalPage: DeleteProductModalPage;
 
@@ -31,7 +32,7 @@ export class ProductsPageService {
     this.addNewProductPage = new AddNewProductPage(page);
     this.product = product;
     this.salesPortalService = new SalesPortalPageService(page);
-    this.productDetailsPage = new ProductDetailsModalPage(page);
+    this.productDetailsModalPage = new ProductDetailsModalPage(page);
     this.editProductPage = new EditProductPage(page);
     this.deleteProductModalPage = new DeleteProductModalPage(page);
   }
@@ -42,21 +43,25 @@ export class ProductsPageService {
     await this.addNewProductPage.waitForOpened();
   }
 
-  @logStep('Open View Product details')
-  async openProductDetails(productName: string) {
-    await this.productsListPage.clickOnProductDetails(productName);
+  @logStep('Open Details Modal')
+  async openProductDetails(productName?: string) {
+    const name = productName ?? this.product.getSettings().name;
+    await this.productsListPage.clickOnProductDetails(name);
+    await this.productDetailsModalPage.waitForOpened();
   }
 
-  @logStep('Open Edit Product from Products list')
-  async openEditProduct(productName: string) {
-    await this.productsListPage.clickOnEditProduct(productName);
+  @logStep('Open Edit from Products List')
+  async openEditProduct(productName?: string) {
+    const name = productName ?? this.product.getSettings().name;
+    await this.productsListPage.clickOnEditProduct(name);
     await this.editProductPage.waitForOverlaySpinnerToHide();
     await this.editProductPage.waitForOpened();
   }
 
-  @logStep('Open Delete product modal page')
-  async openDeleteProduct(productName: string) {
-    await this.productsListPage.clickOnDeleteProduct(productName);
+  @logStep('Open Delete Product Modal')
+  async openDeleteProduct(productName?: string) {
+    const name = productName ?? this.product.getSettings().name;
+    await this.productsListPage.clickOnDeleteProduct(name);
     await this.deleteProductModalPage.waitForOpened();
   }
 
@@ -80,7 +85,7 @@ export class ProductsPageService {
     await this.productsListPage.waitForOpened();
     await this.productsListPage.waitForTableSpinnerToHide();
     await this.validateProductCreatedMessage();
-    await this.checkProductInTable();
+    await this.validateProductInTable();
   }
 
   async populateProduct(customProductData?: IProduct, isAddPage: boolean = true) {
@@ -98,11 +103,14 @@ export class ProductsPageService {
     );
   }
 
-  @logStep('Check product in table')
-  async checkProductInTable(productData?: IProduct) {
+  @logStep('Validate product in table')
+  async validateProductInTable(productData?: IProductFromResponse) {
     const expectedProduct = productData ?? this.product.getSettings();
-    const actualProduct = await this.productsListPage.getDataByName(expectedProduct.name);
-    expect(actualProduct).toEqual(_.pick(expectedProduct, 'name', 'price', 'manufacturer'));
+    expectedProduct.createdOn = moment(expectedProduct.createdOn).format('YYYY/MM/DD HH:mm:ss');
+    const actualProduct = await this.productsListPage.getProductByName(expectedProduct.name);
+    expect(actualProduct).toEqual(
+      _.pick(expectedProduct, 'name', 'price', 'manufacturer', 'createdOn'),
+    );
   }
 
   @logStep('Check product not in table')
@@ -111,24 +119,38 @@ export class ProductsPageService {
     await this.productsListPage.waitForProductToDetached(productName);
   }
 
+  @logStep('Validate created product by details')
+  async validateProductByDetails(productData?: Omit<IProductFromResponse, '_id'>) {
+    const expectedProduct = productData ?? this.product.getProductDataTransformedToDetails();
+    if (!expectedProduct.notes) expectedProduct.notes = '-';
+    await this.openProductDetails(expectedProduct.name);
+    await this.productDetailsModalPage.waitForProductDetailsTitle(expectedProduct.name);
+    const actualProduct = await this.productDetailsModalPage.getProductDetails();
+    expect(actualProduct).toEqual(expectedProduct);
+    await this.closeDetailsModal();
+    await this.productDetailsModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+  }
+
   @logStep('Delete product')
   async delete() {
     await this.product.delete();
   }
 
-  @logStep('Delete product from products list page')
-  async deleteFromProductsList(productName: string) {
-    await this.openDeleteProduct(productName);
+  @logStep('Delete product from Products List')
+  async deleteFromProductsList(productName?: string) {
+    const name = productName ?? this.product.getSettings().name;
+    await this.openDeleteProduct(name);
     await this.deleteInModalPage();
   }
 
-  @logStep('Delete product from Edit product page')
+  @logStep('Delete Product from Edit')
   async deleteProductFromEdit() {
     await this.editProductPage.clickOnDeleteButton();
     await this.deleteInModalPage();
   }
 
-  @logStep('Delete product in modal page')
+  @logStep('Delete product in Modal')
   private async deleteInModalPage() {
     const responseUrl =
       apiConfig.baseUrl + apiConfig.endpoints['Get Product By Id'](this.product.getSettings()._id);
@@ -138,10 +160,16 @@ export class ProductsPageService {
     );
 
     this.product.validateDeleteProductResponseStatus(response as IResponse<IProductResponse>);
+
     await this.deleteProductModalPage.waitForButtonSpinnerToHide();
+    await this.deleteProductModalPage.waitForModalToClose();
     await this.productsListPage.waitForOpened();
     await this.validateProductDeletedMessage();
     await this.checkProductNotInTable();
+    if (!response.body) {
+      const deletedProduct = undefined;
+      this.product.createFromExisting(deletedProduct);
+    }
   }
 
   @logStep('Validate product updated message')
@@ -160,10 +188,53 @@ export class ProductsPageService {
     );
   }
 
-  @logStep('Open Edit product from View Details modal page')
-  async openEditProductFromDetails() {
-    await this.productDetailsPage.clickOnEditProduct();
+  @logStep('Open Edit from Details Modal')
+  async openEditFromDetails() {
+    await this.productDetailsModalPage.clickOnEditProduct();
+    await this.productDetailsModalPage.waitForModalToClose();
     await this.editProductPage.waitForOpened();
+  }
+
+  @logStep('Close Details Modal')
+  async closeDetailsModal() {
+    await this.productDetailsModalPage.clickOnCloseViewDetails();
+    await this.productDetailsModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+  }
+
+  @logStep('Cancel Details Modal')
+  async cancelDetailsModal() {
+    await this.productDetailsModalPage.clickOnCancelViewDetails();
+    await this.productDetailsModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+  }
+
+  @logStep('Delete with Modal exit')
+  async deleteWithModalExit() {
+    await this.confirmDeleteProduct();
+    await this.deleteProductModalPage.waitForButtonSpinnerToHide();
+    await this.deleteProductModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+    this.product.createFromExisting(undefined);
+  }
+
+  @logStep('Close Delete Modal')
+  async closeDeleteModal() {
+    await this.deleteProductModalPage.clickOnCloseDeletion();
+    await this.deleteProductModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+  }
+
+  @logStep('Cancel Delete Modal')
+  async cancelDeleteModal() {
+    await this.deleteProductModalPage.clickOnCancelDeletion();
+    await this.deleteProductModalPage.waitForModalToClose();
+    await this.productsListPage.waitForOpened();
+  }
+
+  @logStep('Confirm Delete Product')
+  async confirmDeleteProduct() {
+    await this.deleteProductModalPage.clickOnDeleteProduct();
   }
 
   @logStep('Update product')
@@ -183,14 +254,10 @@ export class ProductsPageService {
     await this.productsListPage.waitForOpened();
     await this.productsListPage.waitForTableSpinnerToHide();
     await this.validateProductUpdatedMessage();
-    await this.checkProductInTable();
+    await this.validateProductInTable();
   }
 
   async saveProductChanges() {
     await this.editProductPage.clickOnSaveButton();
-  }
-
-  async confirmDeleteProduct() {
-    await this.deleteProductModalPage.clickOnDeleteProduct();
   }
 }

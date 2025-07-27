@@ -10,17 +10,21 @@ test.describe('[UI] [Products] Delete', async function () {
     await homePageService.openProductsPage();
   });
 
-  test('@smoke Delete product from products list page', async function ({
-    productsPageService,
-    product,
-  }) {
+  test('Delete Product from Products List @smoke', async function ({ productsPageService }) {
     setMetadata(Severity.CRITICAL);
-    await productsPageService.deleteFromProductsList(product.getSettings().name);
+    await productsPageService.deleteFromProductsList();
   });
 
-  test('@smoke Delete product from edit page', async function ({ productsPageService, product }) {
+  test('Delete Product from Edit', async function ({ productsPageService }) {
     setMetadata(Severity.CRITICAL);
-    await productsPageService.openEditProduct(product.getSettings().name);
+    await productsPageService.openEditProduct();
+    await productsPageService.deleteProductFromEdit();
+  });
+
+  test('Delete Product from Details', async function ({ productsPageService }) {
+    setMetadata(Severity.CRITICAL);
+    await productsPageService.openProductDetails();
+    await productsPageService.openEditFromDetails();
     await productsPageService.deleteProductFromEdit();
   });
 });

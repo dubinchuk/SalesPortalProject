@@ -24,15 +24,24 @@ export class BasePage {
     state: 'attached' | 'detached' | 'visible' | 'hidden' = 'visible',
     timeout = DEFAULT_TIMEOUT,
   ) {
-    const element = this.findElement(locator);
-    await element.waitFor({ state, timeout });
-    return element;
+    try {
+      const element = this.findElement(locator);
+      await element.waitFor({ state, timeout });
+      return element;
+    } catch (error) {
+      throw new Error(`Failed waiting for element "${locator}" (state: ${state}): ${error}`);
+    }
   }
 
   protected async waitForElementAndScroll(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {
-    const element = await this.waitForElement(locator, 'visible');
-    await element.scrollIntoViewIfNeeded({ timeout });
-    return element;
+    try {
+      const element = await this.waitForElement(locator, 'attached', timeout);
+      await this.waitForElement(element, 'visible', timeout);
+      await element.scrollIntoViewIfNeeded({ timeout });
+      return element;
+    } catch (error) {
+      throw new Error(`Failed to scroll to element "${locator}": ${error}`);
+    }
   }
 
   protected async waitForElementToBeDetached(
