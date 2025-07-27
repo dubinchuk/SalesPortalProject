@@ -15,14 +15,11 @@ test.describe('[UI] [Customers] Create', async function () {
   test('Create customer with valid data @smoke', async function ({
     homePageService,
     customersPageService,
-    customer,
   }) {
     setMetadata(Severity.BLOCKER);
 
     await homePageService.openCustomersPage();
     await customersPageService.openAddNewCustomerPage();
     await customersPageService.create();
-    await customersPageService.validateCustomerCreatedMessage();
-    await customersPageService.checkCustomerInTable(customer.getSettings());
   });
 });

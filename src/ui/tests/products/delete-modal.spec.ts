@@ -16,6 +16,10 @@ test.describe('[UI] [Products] Delete Modal', async function () {
     await productsPageService.openDeleteProduct();
   });
 
+  test.afterEach(async function ({ product }) {
+    await product.delete();
+  });
+
   test('Close Modal on Close cross button click', async function ({ productsPageService }) {
     setMetadata(Severity.NORMAL);
     await productsPageService.closeDeleteModal();
@@ -26,7 +30,7 @@ test.describe('[UI] [Products] Delete Modal', async function () {
     await productsPageService.cancelDeleteModal();
   });
 
-  test('Delete with Modal exit', async function ({ productsPageService }) {
+  test('Delete with Modal exit', async function ({ productsPageService, product }) {
     setMetadata(Severity.NORMAL);
     await productsPageService.deleteWithModalExit();
   });

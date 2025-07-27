@@ -47,6 +47,7 @@ export class ProductsPageService {
   async openProductDetails(productName?: string) {
     const name = productName ?? this.product.getSettings().name;
     await this.productsListPage.clickOnProductDetails(name);
+    await this.productDetailsModalPage.waitForOpened();
   }
 
   @logStep('Open Edit from Products List')
@@ -102,7 +103,7 @@ export class ProductsPageService {
     );
   }
 
-  @logStep('Check product in table')
+  @logStep('Validate product in table')
   async validateProductInTable(productData?: IProductFromResponse) {
     const expectedProduct = productData ?? this.product.getSettings();
     expectedProduct.createdOn = moment(expectedProduct.createdOn).format('YYYY/MM/DD HH:mm:ss');
@@ -127,7 +128,7 @@ export class ProductsPageService {
     const actualProduct = await this.productDetailsModalPage.getProductDetails();
     expect(actualProduct).toEqual(expectedProduct);
     await this.closeDetailsModal();
-    await this.deleteProductModalPage.waitForModalToClose();
+    await this.productDetailsModalPage.waitForModalToClose();
     await this.productsListPage.waitForOpened();
   }
 
@@ -214,6 +215,7 @@ export class ProductsPageService {
     await this.deleteProductModalPage.waitForButtonSpinnerToHide();
     await this.deleteProductModalPage.waitForModalToClose();
     await this.productsListPage.waitForOpened();
+    this.product.createFromExisting(undefined);
   }
 
   @logStep('Close Delete Modal')

@@ -14,12 +14,18 @@ test.describe('[UI] [Customers] Update', async function () {
     await customersPageService.delete();
   });
 
-  test('Update customer with valid data @smoke', async function ({
+  test('Update Customer with valid data from Customers List @smoke', async function ({
     customersPageService,
-    customer,
   }) {
     setMetadata(Severity.CRITICAL);
-    await customersPageService.openEditCustomer(customer.getSettings().email);
+    await customersPageService.openEditCustomer();
+    await customersPageService.update();
+  });
+
+  test('Update Customer with valid data from Details', async function ({ customersPageService }) {
+    setMetadata(Severity.CRITICAL);
+    await customersPageService.openCustomerDetails();
+    await customersPageService.openEditFromDetails();
     await customersPageService.update();
   });
 });
