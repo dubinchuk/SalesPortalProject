@@ -1,8 +1,8 @@
 import { Severity } from 'allure-js-commons';
 
+import { generateNewCustomer } from '../../data/customers/generateCustomer';
 import { test } from '../../fixtures/services.fixtures';
 import { setMetadata } from '../../utils/report/testMetadata';
-import { generateNewCustomer } from '../../data/customers/generateCustomer';
 
 test.describe('[API] [Customers] Create', async function () {
   test.afterEach(async function ({ customer }) {

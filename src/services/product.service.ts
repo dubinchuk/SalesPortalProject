@@ -1,30 +1,29 @@
-import moment from 'moment';
 import { expect } from '@playwright/test';
+import moment from 'moment';
 
+import { SignInService } from './signIn.service';
 import { ProductsApiClient } from '../api/clients/products.client';
-import {
-  IProduct,
-  IProductFromResponse,
-  IProductResponse,
-  IProductsResponse,
-} from '../data/types/product.types';
 import { generateNewProduct } from '../data/products/generateProduct';
+import { createdProductSchema } from '../data/schema/products/product.schema';
+import { allProductsSchema } from '../data/schema/products/products.schema';
 import {
   ErrorResponseCause,
   IResponse,
   IResponseFields,
   STATUS_CODES,
 } from '../data/types/api.types';
+import {
+  IProduct,
+  IProductFromResponse,
+  IProductResponse,
+  IProductsResponse,
+} from '../data/types/product.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
 import {
   validateResponseBody,
   validateResponseStatus,
   validateSchema,
 } from '../utils/validation/response';
-import { createdProductSchema } from '../data/schema/products/product.schema';
-import { allProductsSchema } from '../data/schema/products/products.schema';
-
-import { SignInService } from './signIn.service';
 
 export class Product {
   private service: ProductsApiClient;
@@ -58,10 +57,6 @@ export class Product {
       this.setSettings(undefined);
     }
     this.setSettings(product);
-  }
-
-  private setSettings(productSettings: IProductFromResponse | undefined) {
-    this.settings = productSettings;
   }
 
   getSettings() {
@@ -99,6 +94,7 @@ export class Product {
     const token = await this.signInService.getToken();
     const response = await this.service.getById(this.getSettings()._id, token);
     this.validateGetProductResponseStatus(response);
+    this.validateGetProductResponseBody(response);
     this.setSettings(response.body.Product);
     return response;
   }
@@ -119,19 +115,6 @@ export class Product {
     this.setSettings(response.body.Product);
   }
 
-  validateCreateProductResponseBody(
-    response: IResponse<IProductResponse>,
-    productData: Partial<IProduct>,
-  ) {
-    validateResponseBody<IProductResponse, Partial<IProduct>>(
-      response,
-      true,
-      null,
-      productData,
-      'Product',
-    );
-  }
-
   validateCreateProductResponseStatus(response: IResponse<IProductResponse>) {
     validateResponseStatus<IProductResponse, ErrorResponseCause>(
       response,
@@ -146,12 +129,6 @@ export class Product {
     );
   }
 
-  validateDeleteProductResponseBody(response: IResponse<IResponseFields>) {
-    if (response.status === STATUS_CODES.DELETED) {
-      expect(response.body).toBeNull;
-    }
-  }
-
   validateDeleteProductResponseStatus(response: IResponse<IResponseFields>) {
     validateResponseStatus<IResponseFields, { status: number }>(
       response,
@@ -159,19 +136,6 @@ export class Product {
       DeleteResponseError,
       'Failed to create product',
       { status: response.status },
-    );
-  }
-
-  validateEditProductResponseBody(
-    response: IResponse<IProductResponse>,
-    productData?: Partial<IProduct>,
-  ) {
-    validateResponseBody<IProductResponse, Partial<IProduct>>(
-      response,
-      true,
-      null,
-      productData,
-      'Product',
     );
   }
 
@@ -189,19 +153,6 @@ export class Product {
     );
   }
 
-  validateGetProductResponseBody(
-    response: IResponse<IProductResponse>,
-    productData?: Partial<IProduct>,
-  ) {
-    validateResponseBody<IProductResponse, Partial<IProduct>>(
-      response,
-      true,
-      null,
-      productData,
-      'Product',
-    );
-  }
-
   validateGetProductResponseStatus(response: IResponse<IProductResponse>) {
     validateResponseStatus<IProductResponse, ErrorResponseCause>(
       response,
@@ -213,19 +164,6 @@ export class Product {
         IsSuccess: response.body.IsSuccess,
         ErrorMessage: response.body.ErrorMessage,
       },
-    );
-  }
-
-  validateGetAllProductsResponseBody(
-    response: IResponse<IProductsResponse>,
-    productData?: Partial<IProduct>,
-  ) {
-    validateResponseBody<IProductsResponse, Partial<IProduct>>(
-      response,
-      true,
-      null,
-      productData,
-      'Products',
     );
   }
 
@@ -243,11 +181,73 @@ export class Product {
     );
   }
 
-  validateCreatedProductSchema(response: IResponse<IProductResponse>) {
+  private setSettings(productSettings: IProductFromResponse | undefined) {
+    this.settings = productSettings;
+  }
+
+  private validateCreateProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  private validateEditProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  private validateDeleteProductResponseBody(response: IResponse<IResponseFields>) {
+    if (response.status === STATUS_CODES.DELETED) {
+      expect(response.body).toBeNull;
+    }
+  }
+
+  private validateGetProductResponseBody(
+    response: IResponse<IProductResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Product',
+    );
+  }
+
+  private validateGetAllProductsResponseBody(
+    response: IResponse<IProductsResponse>,
+    productData?: Partial<IProduct>,
+  ) {
+    validateResponseBody<IProductsResponse, Partial<IProduct>>(
+      response,
+      true,
+      null,
+      productData,
+      'Products',
+    );
+  }
+
+  private validateCreatedProductSchema(response: IResponse<IProductResponse>) {
     validateSchema<IProductResponse>(response, createdProductSchema);
   }
 
-  validateAllProductsSchema(response: IResponse<IProductsResponse>) {
+  private validateAllProductsSchema(response: IResponse<IProductsResponse>) {
     validateSchema<IProductsResponse>(response, allProductsSchema);
   }
 }

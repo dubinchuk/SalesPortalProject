@@ -1,6 +1,6 @@
-import { logStep } from '../../utils/report/decorator.js';
-
-import { BasePage } from './base.page.js';
+import { BasePage } from './base.page';
+import { BASE_URL } from '../../config/environment';
+import { logStep } from '../../utils/report/decorator';
 
 export abstract class SalesPortalPage extends BasePage {
   abstract readonly uniqueElement: string;
@@ -16,6 +16,11 @@ export abstract class SalesPortalPage extends BasePage {
 
   async openHeaderModule(moduleName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers') {
     await this.click(this.headerMenuElement(moduleName));
+  }
+
+  @logStep('Open Base URL')
+  async goToBasePage() {
+    await this.openPage(BASE_URL);
   }
 
   @logStep('Wait for unique page element')

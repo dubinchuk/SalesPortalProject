@@ -1,9 +1,9 @@
 import { Severity } from 'allure-js-commons';
 
 import { CUSTOM_API_ERRORS } from '../../data/errors/apiErrors';
+import { generateNewProduct } from '../../data/products/generateProduct';
 import { test, expect } from '../../fixtures/services.fixtures';
 import { setMetadata } from '../../utils/report/testMetadata';
-import { generateNewProduct } from '../../data/products/generateProduct';
 
 test.describe('[API] [Products] Create', async function () {
   test.afterEach(async function ({ product }) {

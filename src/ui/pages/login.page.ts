@@ -1,8 +1,8 @@
-import type { IUserCredentials } from '../../data/types/user.types.js';
-import { logStep } from '../../utils/report/decorator.js';
-import { PASSWORD_INPUT_SELECTOR } from '../../utils/security/sensitiveData.js';
+import { SalesPortalPage } from './salesPortal.page';
+import { logStep } from '../../utils/report/decorator';
+import { PASSWORD_INPUT_SELECTOR } from '../../utils/security/sensitiveData';
 
-import { SalesPortalPage } from './salesPortal.page.js';
+import type { IUserCredentials } from '../../data/types/user.types';
 
 export class SignInPage extends SalesPortalPage {
   uniqueElement = '//form[.//input[@id="emailinput"]]';

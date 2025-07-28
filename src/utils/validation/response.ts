@@ -1,6 +1,6 @@
+import { expect } from '@playwright/test';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { expect } from '@playwright/test';
 import _ from 'lodash';
 
 import { IResponse, STATUS_CODES } from '../../data/types/api.types';

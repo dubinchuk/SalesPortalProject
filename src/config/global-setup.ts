@@ -1,8 +1,8 @@
 import { chromium, type FullConfig } from '@playwright/test';
 
+import { BASE_URL } from './environment';
 import { SignInService } from '../services/signIn.service';
 
-import { BASE_URL } from './environment';
 const authFile = 'src/.auth/user.json';
 
 async function globalSetup(config: FullConfig) {

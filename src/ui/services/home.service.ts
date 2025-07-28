@@ -1,10 +1,9 @@
 import { Page } from '@playwright/test';
 
-import { HomePage } from '../pages/home.page.js';
-import { CustomersListPage } from '../pages/customers/customers.page.js';
-import { BASE_URL } from '../../config/environment.js';
-import { logStep } from '../../utils/report/decorator.js';
-import { ProductsListPage } from '../pages/products/products.page.js';
+import { logStep } from '../../utils/report/decorator';
+import { CustomersListPage } from '../pages/customers/customers.page';
+import { HomePage } from '../pages/home.page';
+import { ProductsListPage } from '../pages/products/products.page';
 
 export class HomeService {
   private homePage: HomePage;
@@ -32,7 +31,7 @@ export class HomeService {
 
   @logStep('Open Home Page')
   async openHomePage() {
-    await this.homePage.openPage(BASE_URL);
+    await this.homePage.goToBasePage();
     await this.homePage.waitForOpened();
   }
 }

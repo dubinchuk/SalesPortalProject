@@ -1,5 +1,5 @@
-import { Locator, Page } from '@playwright/test';
 import { faker } from '@faker-js/faker';
+import { Locator, Page } from '@playwright/test';
 
 import { IResponse } from '../../data/types/api.types';
 import { logAction } from '../../utils/report/decorator';
@@ -113,12 +113,8 @@ export class BasePage {
   }
 
   @logAction('Open URL {selector}')
-  async openPage(url: string) {
+  protected async openPage(url: string) {
     await this.page.goto(url);
-  }
-
-  async deleteCookies() {
-    await this.page.context().clearCookies();
   }
 
   async interceptResponse<T>(
@@ -140,6 +136,10 @@ export class BasePage {
   }
 
   async clearCookies() {
-    await this.page.context().clearCookies();
+    try {
+      await this.page.context().clearCookies();
+    } catch (error) {
+      throw new Error(`Failed to clear cookies: ${error}`);
+    }
   }
 }
