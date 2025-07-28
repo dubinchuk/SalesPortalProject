@@ -18,13 +18,13 @@ import { ProductDetailsModalPage } from '../pages/products/productDetailsModal.p
 import { ProductsListPage } from '../pages/products/products.page';
 
 export class ProductsPageService {
-  private productsListPage: ProductsListPage;
-  private addNewProductPage: AddNewProductPage;
-  private editProductPage: EditProductPage;
-  private productDetailsModalPage: ProductDetailsModalPage;
-  private deleteProductModalPage: DeleteProductModalPage;
-  private product: Product;
-  private salesPortalService: SalesPortalPageService;
+  private readonly productsListPage: ProductsListPage;
+  private readonly addNewProductPage: AddNewProductPage;
+  private readonly editProductPage: EditProductPage;
+  private readonly productDetailsModalPage: ProductDetailsModalPage;
+  private readonly deleteProductModalPage: DeleteProductModalPage;
+  private readonly product: Product;
+  private readonly salesPortalService: SalesPortalPageService;
 
   constructor(page: Page, product: Product) {
     this.productsListPage = new ProductsListPage(page);
@@ -142,7 +142,7 @@ export class ProductsPageService {
   async openEditProduct(productName?: string) {
     const name = productName ?? this.product.getSettings().name;
     await this.productsListPage.clickOnEditProduct(name);
-    await this.editProductPage.waitForOverlaySpinnerToHide();
+    await this.editProductPage.waitForOverlaySpinnersToHide();
     await this.editProductPage.waitForOpened();
   }
 

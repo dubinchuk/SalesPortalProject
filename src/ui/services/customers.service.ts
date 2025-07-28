@@ -149,14 +149,14 @@ export class CustomersPageService {
   async openEditCustomer(customerEmail?: string) {
     const email = customerEmail ?? this.customer.getSettings().email;
     await this.customersListPage.clickOnEditCustomer(email);
-    await this.editCustomerPage.waitForOverlaySpinnerToHide();
+    await this.editCustomerPage.waitForOverlaySpinnersToHide();
     await this.editCustomerPage.waitForOpened();
   }
 
   @logStep('Open Edit from Details')
   async openEditFromDetails() {
     await this.customerDetailsPage.clickOnEditCustomer();
-    await this.editCustomerPage.waitForOverlaySpinnerToHide();
+    await this.editCustomerPage.waitForOverlaySpinnersToHide();
     await this.editCustomerPage.waitForOpened();
   }
 
@@ -193,6 +193,7 @@ export class CustomersPageService {
     const expectedCustomer = customerData ?? this.customer.getCustomerDataTransformedToDetails();
     if (!expectedCustomer.notes) expectedCustomer.notes = '-';
     await this.openCustomerDetails(expectedCustomer.email);
+    await this.customerDetailsPage.waitForOverlaySpinnersToHide();
     const actualCustomer = await this.customerDetailsPage.getCustomerDetails();
     expect(actualCustomer).toEqual(expectedCustomer);
   }

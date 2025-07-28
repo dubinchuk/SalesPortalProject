@@ -35,8 +35,8 @@ export class BasePage {
 
   protected async waitForElementAndScroll(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {
     try {
-      const element = await this.waitForElement(locator, 'attached', timeout);
-      await this.waitForElement(element, 'visible', timeout);
+      await this.waitForElement(locator, 'visible', timeout);
+      const element = this.findElement(locator);
       await element.scrollIntoViewIfNeeded({ timeout });
       return element;
     } catch (error) {
@@ -73,7 +73,14 @@ export class BasePage {
 
     try {
       for (const spinner of spinners) {
-        await this.waitForElement(spinner, 'hidden');
+        const element = this.findElement(spinner);
+        const count = await element.count();
+        if (count === 1) {
+          await this.waitForElement(element, 'hidden', 10000);
+        }
+        for (let i = 0; i < count; i++) {
+          await this.waitForElement(element.nth(i), 'hidden', 10000);
+        }
       }
     } catch (error) {
       throw new Error(`Failed waiting spinner(s) to hide: ${error}`);
