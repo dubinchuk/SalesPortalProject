@@ -1,6 +1,6 @@
+import { expect } from '@playwright/test';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
-import { expect } from '@playwright/test';
 import _ from 'lodash';
 
 import { IResponse, STATUS_CODES } from '../../data/types/api.types';
@@ -28,7 +28,7 @@ export function validateResponseBody<T extends object, U extends object>(
   response: IResponse<T>,
   IsSuccess?: boolean,
   ErrorMessage?: null | string,
-  expectedBodyData?: U,
+  expectedBodyData?: U | U[],
   targetKey?: keyof typeof response.body,
 ) {
   if (isResponseWithIsSuccessAndErrorMessage(response)) {

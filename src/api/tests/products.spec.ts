@@ -3,7 +3,6 @@ import { Severity } from 'allure-js-commons';
 import { CUSTOM_API_ERRORS } from '../../data/errors/apiErrors';
 import { test, expect } from '../../fixtures/services.fixtures';
 import { setMetadata } from '../../utils/report/testMetadata';
-import { generateNewProduct } from '../../data/products/generateProduct';
 
 test.describe('[API] [Products] Create', async function () {
   test.afterEach(async function ({ product }) {
@@ -69,7 +68,6 @@ test.describe('[API] [Products] Edit', async function () {
 
   test('Edit created product @smoke', async function ({ product }) {
     setMetadata(Severity.CRITICAL);
-    const newProduct = generateNewProduct();
-    await product.edit({ ...newProduct, _id: product.getSettings()._id });
+    await product.edit();
   });
 });

@@ -1,7 +1,7 @@
 import { faker } from '@faker-js/faker';
 
-import { ICustomer, COUNTRIES } from '../types/customers.types';
 import { getRandromEnumValue } from '../../utils/enums/getRandomValue';
+import { ICustomer, COUNTRIES } from '../types/customers.types';
 
 export const generateNewCustomer = (params?: Partial<ICustomer>) => {
   return {

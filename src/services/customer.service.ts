@@ -1,34 +1,35 @@
 import { expect } from '@playwright/test';
+import _ from 'lodash';
 import moment from 'moment';
 
-import {
-  ICustomer,
-  ICustomerFromResponse,
-  ICustomerResponse,
-  ICustomersResponse,
-} from '../data/types/customers.types';
+import { SignInService } from './signIn.service';
 import { CustomerApiClient } from '../api/clients/customers.client';
 import { generateNewCustomer } from '../data/customers/generateCustomer';
+import { createdCustomerSchema } from '../data/schema/customers/customer.schema';
+import { allCustomersSchema } from '../data/schema/customers/customers.schema';
 import {
   ErrorResponseCause,
   IResponse,
   IResponseFields,
   STATUS_CODES,
 } from '../data/types/api.types';
+import {
+  ICustomer,
+  ICustomerFromResponse,
+  ICustomerResponse,
+  ICustomersResponse,
+} from '../data/types/customers.types';
 import { DeleteResponseError, ResponseError } from '../utils/errors/errors';
 import {
   validateResponseBody,
   validateResponseStatus,
   validateSchema,
 } from '../utils/validation/response';
-import { createdCustomerSchema } from '../data/schema/customers/customer.schema';
-import { allCustomersSchema } from '../data/schema/customers/customers.schema';
-
-import { SignInService } from './signIn.service';
 
 export class Customer {
   private service: CustomerApiClient;
   private settings: ICustomerFromResponse | undefined;
+  private customerInputSettings: ICustomer | undefined;
 
   constructor(private signInService: SignInService) {
     this.service = new CustomerApiClient();
@@ -36,21 +37,63 @@ export class Customer {
 
   //TODO: добавить возможность работы с несколькими кастомерами
   async create(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
-    const customerData = generateNewCustomer(customCustomerData);
+    const customerData = customCustomerData ?? generateNewCustomer(customCustomerData);
+    this.setCustomerInputSettings(customerData as ICustomer);
     const token = await this.signInService.getToken();
-    const response = await this.service.create(customerData, token, expectError);
+    const response = await this.service.create(customerData as ICustomer, token, expectError);
 
     this.validateCreateCustomerResponseStatus(response);
 
     this.setSettings(response.body.Customer);
-    return { response, customerData };
+    return response;
   }
 
   async createAndValidate(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
-    const { response, customerData } = await this.create(customCustomerData, expectError);
+    const response = await this.create(customCustomerData, expectError);
 
-    this.validateCreateCustomerResponseBody(response, customerData);
+    this.validateCreateCustomerResponseBody(response, this.getCustomerInputSettings());
     this.validateCreateCustomerSchema(response);
+  }
+
+  //TODO: добавить проверку customerData
+  async edit(_id?: string, newCustomerSettings?: ICustomer) {
+    const customerId = _id ?? this.getSettings()._id;
+    const newCustomer = newCustomerSettings ?? generateNewCustomer();
+    const token = await this.signInService.getToken();
+    const response = await this.service.update({ ...newCustomer, _id: customerId }, token);
+    this.validateEditCustomerResponseStatus(response);
+    this.validateEditCustomerResponseBody(response, newCustomer);
+    this.setSettings(response.body.Customer);
+  }
+
+  async delete() {
+    if (!this.settings) return;
+    const token = await this.signInService.getToken();
+    const response = await this.service.delete(this.getSettings()._id, token);
+    this.validateDeleteCustomerResponseStatus(response);
+
+    return response;
+  }
+
+  async deleteAndValidate() {
+    const response = await this.delete();
+    if (response) this.validateDeleteCustomerResponseBody(response);
+  }
+
+  async getLatest() {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getById(this.getSettings()._id, token);
+    const customerData = _.omit(this.getSettings(), '_id', 'createdOn');
+    this.validateGetCustomerResponseStatus(response);
+    this.validateGetCustomerResponseBody(response, customerData);
+  }
+
+  async getAll() {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getAll(token);
+    this.validateGetAllCustomersResponseStatus(response);
+    this.validateGetAllCustomersResponseBody(response);
+    this.validateAllCustomersSchema(response);
   }
 
   createFromExisting(customer: ICustomerFromResponse | undefined) {
@@ -58,10 +101,6 @@ export class Customer {
       this.setSettings(undefined);
     }
     this.setSettings(customer);
-  }
-
-  private setSettings(customerSettings: ICustomerFromResponse | undefined) {
-    this.settings = customerSettings;
   }
 
   getSettings() {
@@ -85,54 +124,9 @@ export class Customer {
     };
   }
 
-  async delete() {
-    if (!this.settings) return;
-    const token = await this.signInService.getToken();
-    const response = await this.service.delete(this.getSettings()._id, token);
-    this.validateDeleteCustomerResponseStatus(response);
-
-    return response;
-  }
-
-  async deleteAndValidate() {
-    const response = await this.delete();
-    if (response) this.validateDeleteCustomerResponseBody(response);
-  }
-
-  async getLatest() {
-    const token = await this.signInService.getToken();
-    const response = await this.service.getById(this.getSettings()._id, token);
-    this.validateGetCustomerResponseStatus(response);
-    this.validateGetCustomerResponseBody(response);
-  }
-
-  async getAll() {
-    const token = await this.signInService.getToken();
-    const response = await this.service.getAll(token);
-    this.validateGetAllCustomersResponseStatus(response);
-    this.validateGetAllCustomersResponseBody(response);
-    this.validateAllCustomersSchema(response);
-  }
-
-  async edit(newCustomerSettings: ICustomer & { _id: string }) {
-    const token = await this.signInService.getToken();
-    const response = await this.service.update(newCustomerSettings, token);
-    this.validateEditCustomerResponseStatus(response);
-    this.validateEditCustomerResponseBody(response);
-    this.setSettings(response.body.Customer);
-  }
-
-  validateCreateCustomerResponseBody(
-    response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
-  ) {
-    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
-      response,
-      true,
-      null,
-      customerData,
-      'Customer',
-    );
+  getCustomerInputSettings() {
+    if (!this.customerInputSettings) throw new Error('No customer input settings');
+    return this.customerInputSettings;
   }
 
   validateCreateCustomerResponseStatus(response: IResponse<ICustomerResponse>) {
@@ -146,35 +140,6 @@ export class Customer {
         IsSuccess: response.body.IsSuccess,
         ErrorMessage: response.body.ErrorMessage,
       },
-    );
-  }
-
-  validateDeleteCustomerResponseBody(response: IResponse<IResponseFields | null>) {
-    if (response.status === STATUS_CODES.DELETED) {
-      expect(response.body).toBeNull();
-    }
-  }
-
-  validateDeleteCustomerResponseStatus(response: IResponse<IResponseFields>) {
-    validateResponseStatus<IResponseFields, { status: number }>(
-      response,
-      STATUS_CODES.DELETED,
-      DeleteResponseError,
-      'Failed to delete customer',
-      { status: response.status },
-    );
-  }
-
-  validateEditCustomerResponseBody(
-    response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
-  ) {
-    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
-      response,
-      true,
-      null,
-      customerData,
-      'Customer',
     );
   }
 
@@ -192,16 +157,13 @@ export class Customer {
     );
   }
 
-  validateGetCustomerResponseBody(
-    response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
-  ) {
-    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+  validateDeleteCustomerResponseStatus(response: IResponse<IResponseFields>) {
+    validateResponseStatus<IResponseFields, { status: number }>(
       response,
-      true,
-      null,
-      customerData,
-      'Customer',
+      STATUS_CODES.DELETED,
+      DeleteResponseError,
+      'Failed to delete customer',
+      { status: response.status },
     );
   }
 
@@ -219,19 +181,6 @@ export class Customer {
     );
   }
 
-  validateGetAllCustomersResponseBody(
-    response: IResponse<ICustomersResponse>,
-    customerData?: Partial<ICustomer>,
-  ) {
-    validateResponseBody<ICustomersResponse, Partial<ICustomer>>(
-      response,
-      true,
-      null,
-      customerData,
-      'Customers',
-    );
-  }
-
   validateGetAllCustomersResponseStatus(response: IResponse<ICustomersResponse>) {
     validateResponseStatus<ICustomersResponse, ErrorResponseCause>(
       response,
@@ -246,11 +195,77 @@ export class Customer {
     );
   }
 
-  validateCreateCustomerSchema(response: IResponse<ICustomerResponse>) {
+  private setSettings(customerSettings: ICustomerFromResponse | undefined) {
+    this.settings = customerSettings;
+  }
+
+  private setCustomerInputSettings(customerInputs: ICustomer | undefined) {
+    this.customerInputSettings = customerInputs;
+  }
+
+  private validateCreateCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  private validateEditCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  private validateDeleteCustomerResponseBody(response: IResponse<IResponseFields | null>) {
+    if (response.status === STATUS_CODES.DELETED) {
+      expect(response.body).toBeNull();
+    }
+  }
+
+  private validateGetCustomerResponseBody(
+    response: IResponse<ICustomerResponse>,
+    customerData: Partial<ICustomer>,
+  ) {
+    validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customer',
+    );
+  }
+
+  private validateGetAllCustomersResponseBody(
+    response: IResponse<ICustomersResponse>,
+    customerData?: Partial<ICustomer>[],
+  ) {
+    validateResponseBody<ICustomersResponse, Partial<ICustomer>>(
+      response,
+      true,
+      null,
+      customerData,
+      'Customers',
+    );
+  }
+
+  private validateCreateCustomerSchema(response: IResponse<ICustomerResponse>) {
     validateSchema<ICustomerResponse>(response, createdCustomerSchema);
   }
 
-  validateAllCustomersSchema(response: IResponse<ICustomersResponse>) {
+  private validateAllCustomersSchema(response: IResponse<ICustomersResponse>) {
     validateSchema<ICustomersResponse>(response, allCustomersSchema);
   }
 }

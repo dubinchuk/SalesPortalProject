@@ -1,13 +1,13 @@
 import { expect, Page, request } from '@playwright/test';
 
 import { SignInApiClient } from '../api/clients/signIn.client';
-import { ADMIN_PASSWORD, ADMIN_USERNAME, BASE_URL, TESTS } from '../config/environment';
-import { IUserCredentials } from '../data/types/user.types';
-import { SignInPage } from '../ui/pages/login.page';
-import { HomePage } from '../ui/pages/home.page';
-import { logStep } from '../utils/report/decorator';
-import { STATUS_CODES } from '../data/types/api.types';
 import { apiConfig } from '../config/apiConfig';
+import { ADMIN_PASSWORD, ADMIN_USERNAME, TESTS } from '../config/environment';
+import { STATUS_CODES } from '../data/types/api.types';
+import { IUserCredentials } from '../data/types/user.types';
+import { HomePage } from '../ui/pages/home.page';
+import { SignInPage } from '../ui/pages/login.page';
+import { logStep } from '../utils/report/decorator';
 
 export class SignInService {
   private homePage: HomePage;
@@ -31,20 +31,6 @@ export class SignInService {
       TESTS === 'ui' ? await this.getTokenFromBrowser() : await this.getTokenApi();
     }
     return this.transformToken();
-  }
-
-  private async getTokenFromBrowser() {
-    const token = (await this.homePage.getCookies()).find(
-      (cookie) => cookie.name === 'Authorization',
-    );
-    if (!token) throw new Error('Failed to get token from browser');
-    this.token = token.value;
-  }
-
-  private async getTokenApi() {
-    if (!this.token) {
-      await this.signInAsAdminAPI();
-    }
   }
 
   async setToken(token: string) {
@@ -81,7 +67,8 @@ export class SignInService {
 
   @logStep('Open Sales Portal')
   async openSalesPortal() {
-    await this.signInPage.openPage(BASE_URL);
+    await this.signInPage.goToBasePage();
+    await this.signInPage.waitForOpened();
   }
 
   transformToken() {
@@ -127,5 +114,19 @@ export class SignInService {
 
     this.token = `Bearer ${token}`;
     return responseHeaders['authorization'];
+  }
+
+  private async getTokenFromBrowser() {
+    const token = (await this.homePage.getCookies()).find(
+      (cookie) => cookie.name === 'Authorization',
+    );
+    if (!token) throw new Error('Failed to get token from browser');
+    this.token = token.value;
+  }
+
+  private async getTokenApi() {
+    if (!this.token) {
+      await this.signInAsAdminAPI();
+    }
   }
 }

@@ -1,12 +1,12 @@
 import { test as base } from '@playwright/test';
 
+import { Customer } from '../services/customer.service';
+import { Product } from '../services/product.service';
+import { SignInService } from '../services/signIn.service';
 import { CustomersPageService } from '../ui/services/customers.service';
 import { HomeService } from '../ui/services/home.service';
-import { SignInPageService } from '../ui/services/signIn.service';
-import { SignInService } from '../services/signIn.service';
-import { Product } from '../services/product.service';
-import { Customer } from '../services/customer.service';
 import { ProductsPageService } from '../ui/services/products.service';
+import { SignInPageService } from '../ui/services/signIn.service';
 import { checkMetadataIsSet, resetMetadataFlag } from '../utils/report/testMetadata';
 
 interface ISalesPortalServices {

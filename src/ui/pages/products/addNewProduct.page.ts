@@ -1,4 +1,4 @@
-import { ProductFormPage } from './productForm.page.js';
+import { ProductFormPage } from './productForm.page';
 
 export class AddNewProductPage extends ProductFormPage {
   readonly uniqueElement = '//h2[.="Add New Product "]';

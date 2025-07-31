@@ -1,4 +1,4 @@
-import { COUNTRIES } from '../../types/customers.types.js';
+import { COUNTRIES } from '../../types/customers.types';
 
 export const createdCustomerSchema = {
   type: 'object',

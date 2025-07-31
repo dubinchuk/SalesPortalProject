@@ -1,7 +1,7 @@
 import { Page, test as base } from '@playwright/test';
 
-import { STATUS_CODES } from '../data/types/api.types';
 import { CustomersMockService } from '../api/services/customersMock.service';
+import { STATUS_CODES } from '../data/types/api.types';
 
 export class Mock {
   constructor(private page: Page) {}

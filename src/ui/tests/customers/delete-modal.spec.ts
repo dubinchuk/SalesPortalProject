@@ -4,14 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Customers] Delete Modal', async function () {
-  test.beforeEach(async function ({
-    signInService,
-    customer,
-    homePageService,
-    customersPageService,
-  }) {
+  test.beforeEach(async function ({ customer, homePageService, customersPageService }) {
     await customer.create();
-    await signInService.openSalesPortal();
+    await homePageService.openHomePage();
     await homePageService.openCustomersPage();
     await customersPageService.openDeleteCustomer();
   });
@@ -30,7 +25,7 @@ test.describe('[UI] [Customers] Delete Modal', async function () {
     await customersPageService.cancelDeleteModal();
   });
 
-  test('Delete with Modal exit', async function ({ customersPageService, customer }) {
+  test('Delete with Modal exit', async function ({ customersPageService }) {
     setMetadata(Severity.NORMAL);
     await customersPageService.deleteWithModalExit();
   });

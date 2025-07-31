@@ -1,6 +1,5 @@
-import { logStep } from '../../../utils/report/decorator';
-
 import { CustomerFormPage } from './customerForm.page';
+import { logStep } from '../../../utils/report/decorator';
 
 export class AddNewCustomerPage extends CustomerFormPage {
   readonly uniqueElement = '//h2[.="Add New Customer "]';

@@ -1,6 +1,6 @@
-import { logStep } from '../../utils/report/decorator.js';
-
-import { BasePage } from './base.page.js';
+import { BasePage } from './base.page';
+import { BASE_URL } from '../../config/environment';
+import { logStep } from '../../utils/report/decorator';
 
 export abstract class SalesPortalPage extends BasePage {
   abstract readonly uniqueElement: string;
@@ -8,7 +8,7 @@ export abstract class SalesPortalPage extends BasePage {
   private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
   private readonly 'Table spinner' = this.findElement('#table-container .spinner-border');
-  private readonly 'Overlay spinner' = this.findElement('.overlay-spinner .spinner-border');
+  private readonly 'Overlay spinners' = this.findElement('.overlay-spinner .spinner-border');
   private readonly 'Active modal window' = this.findElement('.modal-open');
   private readonly headerMenuElement = (
     itemName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers',
@@ -16,6 +16,11 @@ export abstract class SalesPortalPage extends BasePage {
 
   async openHeaderModule(moduleName: 'Home' | 'Products' | 'Customers' | 'Orders' | 'Managers') {
     await this.click(this.headerMenuElement(moduleName));
+  }
+
+  @logStep('Open Base URL')
+  async goToBasePage() {
+    await this.openPage(BASE_URL);
   }
 
   @logStep('Wait for unique page element')
@@ -33,9 +38,9 @@ export abstract class SalesPortalPage extends BasePage {
     await this.waitForSpinnerToHide(this['Table spinner']);
   }
 
-  @logStep('Wait for overlay spinner to hide')
-  async waitForOverlaySpinnerToHide() {
-    await this.waitForSpinnerToHide(this['Overlay spinner']);
+  @logStep('Wait for overlay spinner(s) to hide')
+  async waitForOverlaySpinnersToHide() {
+    await this.waitForSpinnerToHide(this['Overlay spinners']);
   }
 
   async getToastMessage() {

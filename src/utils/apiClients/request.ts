@@ -1,9 +1,9 @@
 import { APIResponse, request } from '@playwright/test';
 import _ from 'lodash';
 
-import { AllureReporter } from '../report/allure.reporter';
-import { IRequestOptions, IResponse, IResponseFields } from '../../data/types/api.types';
 import { apiConfig } from '../../config/apiConfig';
+import { IRequestOptions, IResponse, IResponseFields } from '../../data/types/api.types';
+import { AllureReporter } from '../report/allure.reporter';
 
 export class RequestApi {
   private response!: APIResponse;

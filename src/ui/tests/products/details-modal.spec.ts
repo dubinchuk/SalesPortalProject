@@ -4,9 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Products] Details Modal', async function () {
-  test.beforeEach(async function ({ signInService, product, homePageService }) {
+  test.beforeEach(async function ({ product, homePageService }) {
     await product.create();
-    await signInService.openSalesPortal();
+    await homePageService.openHomePage();
     await homePageService.openProductsPage();
   });
 

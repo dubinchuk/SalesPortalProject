@@ -5,9 +5,9 @@ import { ICustomer, ICustomerFromResponse } from '../../data/types/customers.typ
 import { Mock } from '../../fixtures/mock.fixtures';
 
 export class CustomersMockService {
-  constructor(private mock: Mock) {}
-
   private customersUrlAPI = getCustomersUrlRegex();
+
+  constructor(private mock: Mock) {}
 
   async addCustomersToTableMock(customers: ICustomerFromResponse[]) {
     TABLE_MOCK.Customers.push(...customers);

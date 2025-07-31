@@ -1,10 +1,9 @@
-import { CONTAINERS } from '../../data/types/home.types.js';
-import { logStep } from '../../utils/report/decorator.js';
-
-import { SalesPortalPage } from './salesPortal.page.js';
+import { SalesPortalPage } from './salesPortal.page';
+import { CONTAINERS } from '../../data/types/home.types';
+import { logStep } from '../../utils/report/decorator';
 
 export class HomePage extends SalesPortalPage {
-  uniqueElement = '//strong[.="Admin"]';
+  uniqueElement = '//h1[.="Welcome to Sales Management Portal"]';
 
   private readonly 'Orders button' = this.findElement('#orders-from-home');
   private readonly 'Products button' = this.findElement('#products-from-home');
@@ -23,11 +22,6 @@ export class HomePage extends SalesPortalPage {
     [CONTAINERS.TOP_CUSTOMERS]: '#top-customers-container',
   };
 
-  private readonly getSpinnerByContainerName = (containerName: CONTAINERS) => {
-    const containerSelector = this.containers[containerName];
-    return this.findElement(`${containerSelector} .spinner-border`);
-  };
-
   @logStep('Wait for Home page containers spinners to hide')
   async waitForHomeSpinnersToHide() {
     const spinners = (Object.keys(this.containers) as CONTAINERS[]).map((name) =>
@@ -39,4 +33,9 @@ export class HomePage extends SalesPortalPage {
   async openViewDetailsModule(moduleName: 'Products' | 'Customers' | 'Orders') {
     await this.click(this[`${moduleName} button`]);
   }
+
+  private readonly getSpinnerByContainerName = (containerName: CONTAINERS) => {
+    const containerSelector = this.containers[containerName];
+    return this.findElement(`${containerSelector} .spinner-border`);
+  };
 }

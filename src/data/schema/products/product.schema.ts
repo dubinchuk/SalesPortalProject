@@ -1,4 +1,4 @@
-import { MANUFACTURERS } from '../../types/product.types.js';
+import { MANUFACTURERS } from '../../types/product.types';
 
 export const createdProductSchema = {
   type: 'object',

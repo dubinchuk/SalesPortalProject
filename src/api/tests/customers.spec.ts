@@ -2,7 +2,6 @@ import { Severity } from 'allure-js-commons';
 
 import { test } from '../../fixtures/services.fixtures';
 import { setMetadata } from '../../utils/report/testMetadata';
-import { generateNewCustomer } from '../../data/customers/generateCustomer';
 
 test.describe('[API] [Customers] Create', async function () {
   test.afterEach(async function ({ customer }) {
@@ -59,7 +58,6 @@ test.describe('[API] [Customers] Edit', async function () {
 
   test('Edit created customer @smoke', async function ({ customer }) {
     setMetadata(Severity.CRITICAL);
-    const newCustomer = generateNewCustomer();
-    await customer.edit({ ...newCustomer, _id: customer.getSettings()._id });
+    await customer.edit();
   });
 });

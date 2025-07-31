@@ -4,8 +4,8 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Customers] Create', async function () {
-  test.beforeEach(async function ({ signInPageService }) {
-    await signInPageService.openSalesPortal();
+  test.beforeEach(async function ({ homePageService }) {
+    await homePageService.openHomePage();
   });
 
   test.afterEach(async function ({ customersPageService }) {

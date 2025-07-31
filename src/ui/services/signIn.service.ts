@@ -1,10 +1,10 @@
 import { Page } from '@playwright/test';
 
-import { ADMIN_PASSWORD, ADMIN_USERNAME, BASE_URL } from '../../config/environment';
-import { IUserCredentials } from '../../data/types/user.types.js';
-import { HomePage } from '../pages/home.page.js';
-import { SignInPage } from '../pages/login.page.js';
-import { logStep } from '../../utils/report/decorator.js';
+import { ADMIN_PASSWORD, ADMIN_USERNAME } from '../../config/environment';
+import { IUserCredentials } from '../../data/types/user.types';
+import { logStep } from '../../utils/report/decorator';
+import { HomePage } from '../pages/home.page';
+import { SignInPage } from '../pages/login.page';
 
 export class SignInPageService {
   private signInPage: SignInPage;
@@ -16,7 +16,8 @@ export class SignInPageService {
 
   @logStep('Open Sales Portal')
   async openSalesPortal() {
-    await this.signInPage.openPage(BASE_URL);
+    await this.signInPage.goToBasePage();
+    await this.signInPage.waitForOpened();
   }
 
   @logStep('Login')
@@ -39,6 +40,6 @@ export class SignInPageService {
 
   @logStep('Clear cookies')
   async clearCookies() {
-    await this.signInPage.deleteCookies();
+    await this.signInPage.clearCookies();
   }
 }

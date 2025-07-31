@@ -4,6 +4,7 @@ import { SalesPortalPage } from '../salesPortal.page';
 export class CustomersListPage extends SalesPortalPage {
   uniqueElement = '//h2[text()="Customers List "]';
 
+  readonly 'Empty table message' = 'td.fs-italic';
   private readonly 'Add New Customer button' = this.findElement('a.page-title-header');
   private readonly 'Column sort button by name' = (name: CUSTOMERS_COLUMN_NAME) =>
     this.findElement(`//div[.="${name}"]`);
@@ -26,39 +27,12 @@ export class CustomersListPage extends SalesPortalPage {
   private readonly 'Country column data' = '//tr/td[3]';
   private readonly 'Created On column data' = '//tr/td[4]';
 
-  readonly 'Empty table message' = 'td.fs-italic';
-
-  async getCustomerByEmail(email: string) {
-    const [name, country, createdOn] = await Promise.all([
-      this.getText(this['Name by email'](email)),
-      this.getText(this['Country by email'](email)),
-      this.getText(this['Created On by email'](email)),
-    ]);
-    return { email, name, country, createdOn };
-  }
-
   async waitForCustomerToDetached(email: string) {
     try {
       await this.waitForElementToBeDetached(this['Table row selector'](email));
     } catch {
       throw new Error(`Deleted customer with email ${email} was found in table`);
     }
-  }
-
-  private async getColumnData(columnName: CUSTOMERS_COLUMN_NAME) {
-    const locator = this.findElement(this[`${columnName} column data`]);
-    const elements = await locator.all();
-    return Promise.all(elements.map((element) => element.innerText()));
-  }
-
-  async getCustomersColumns() {
-    const storage: string[][] = [];
-    const columns = Object.values(CUSTOMERS_COLUMN_NAME);
-
-    for (const column of columns) {
-      storage.push(await this.getColumnData(column));
-    }
-    return storage;
   }
 
   async clickOnColumnHeaderToSort(name: CUSTOMERS_COLUMN_NAME) {
@@ -83,5 +57,30 @@ export class CustomersListPage extends SalesPortalPage {
 
   async getEmptyTableMessage() {
     return this.getText(this['Empty table message']);
+  }
+
+  async getCustomerByEmail(email: string) {
+    const [name, country, createdOn] = await Promise.all([
+      this.getText(this['Name by email'](email)),
+      this.getText(this['Country by email'](email)),
+      this.getText(this['Created On by email'](email)),
+    ]);
+    return { email, name, country, createdOn };
+  }
+
+  async getCustomersColumns() {
+    const storage: string[][] = [];
+    const columns = Object.values(CUSTOMERS_COLUMN_NAME);
+
+    for (const column of columns) {
+      storage.push(await this.getColumnData(column));
+    }
+    return storage;
+  }
+
+  private async getColumnData(columnName: CUSTOMERS_COLUMN_NAME) {
+    const locator = this.findElement(this[`${columnName} column data`]);
+    const elements = await locator.all();
+    return Promise.all(elements.map((element) => element.innerText()));
   }
 }

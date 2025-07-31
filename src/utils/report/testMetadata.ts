@@ -1,3 +1,4 @@
+import test from '@playwright/test';
 import { Severity } from 'allure-js-commons';
 import { allure } from 'allure-playwright';
 
@@ -14,7 +15,7 @@ export function resetMetadataFlag() {
 }
 
 export function checkMetadataIsSet() {
-  if (!metadataIsSet) {
+  if (test.info().status !== 'failed' && !metadataIsSet) {
     throw new Error('Requiered test metadata is not set! Add setMetadata() inside the test.');
   }
 }
