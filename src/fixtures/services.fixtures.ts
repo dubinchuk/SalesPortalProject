@@ -1,6 +1,7 @@
 import { test as base } from '@playwright/test';
 
 import { Customer } from '../services/customer.service';
+import { Order } from '../services/order.service';
 import { Product } from '../services/product.service';
 import { SignInService } from '../services/signIn.service';
 import { CustomersPageService } from '../ui/services/customers.service';
@@ -17,6 +18,7 @@ interface ISalesPortalServices {
   signInService: SignInService;
   product: Product;
   productsPageService: ProductsPageService;
+  order: Order;
 }
 
 export const test = base.extend<ISalesPortalServices>({
@@ -46,6 +48,10 @@ export const test = base.extend<ISalesPortalServices>({
 
   productsPageService: async ({ page, product }, use) => {
     await use(new ProductsPageService(page, product));
+  },
+
+  order: async ({ signInService, customer, product }, use) => {
+    await use(new Order(signInService, customer, product));
   },
 });
 
