@@ -25,7 +25,7 @@ test.describe('[UI] [Customers] Delete Modal', async function () {
     await customersPageService.cancelDeleteModal();
   });
 
-  test('Delete with Modal exit', async function ({ customersPageService, customer }) {
+  test('Delete with Modal exit', async function ({ customersPageService }) {
     setMetadata(Severity.NORMAL);
     await customersPageService.deleteWithModalExit();
   });

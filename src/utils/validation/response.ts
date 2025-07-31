@@ -28,7 +28,7 @@ export function validateResponseBody<T extends object, U extends object>(
   response: IResponse<T>,
   IsSuccess?: boolean,
   ErrorMessage?: null | string,
-  expectedBodyData?: U,
+  expectedBodyData?: U | U[],
   targetKey?: keyof typeof response.body,
 ) {
   if (isResponseWithIsSuccessAndErrorMessage(response)) {

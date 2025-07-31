@@ -1,4 +1,5 @@
 import { expect } from '@playwright/test';
+import _ from 'lodash';
 import moment from 'moment';
 
 import { SignInService } from './signIn.service';
@@ -28,6 +29,7 @@ import {
 export class Customer {
   private service: CustomerApiClient;
   private settings: ICustomerFromResponse | undefined;
+  private customerInputSettings: ICustomer | undefined;
 
   constructor(private signInService: SignInService) {
     this.service = new CustomerApiClient();
@@ -35,28 +37,32 @@ export class Customer {
 
   //TODO: добавить возможность работы с несколькими кастомерами
   async create(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
-    const customerData = generateNewCustomer(customCustomerData);
+    const customerData = customCustomerData ?? generateNewCustomer(customCustomerData);
+    this.setCustomerInputSettings(customerData as ICustomer);
     const token = await this.signInService.getToken();
-    const response = await this.service.create(customerData, token, expectError);
+    const response = await this.service.create(customerData as ICustomer, token, expectError);
 
     this.validateCreateCustomerResponseStatus(response);
 
     this.setSettings(response.body.Customer);
-    return { response, customerData };
+    return response;
   }
 
   async createAndValidate(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
-    const { response, customerData } = await this.create(customCustomerData, expectError);
+    const response = await this.create(customCustomerData, expectError);
 
-    this.validateCreateCustomerResponseBody(response, customerData);
+    this.validateCreateCustomerResponseBody(response, this.getCustomerInputSettings());
     this.validateCreateCustomerSchema(response);
   }
 
-  async edit(newCustomerSettings: ICustomer & { _id: string }) {
+  //TODO: добавить проверку customerData
+  async edit(_id?: string, newCustomerSettings?: ICustomer) {
+    const customerId = _id ?? this.getSettings()._id;
+    const newCustomer = newCustomerSettings ?? generateNewCustomer();
     const token = await this.signInService.getToken();
-    const response = await this.service.update(newCustomerSettings, token);
+    const response = await this.service.update({ ...newCustomer, _id: customerId }, token);
     this.validateEditCustomerResponseStatus(response);
-    this.validateEditCustomerResponseBody(response);
+    this.validateEditCustomerResponseBody(response, newCustomer);
     this.setSettings(response.body.Customer);
   }
 
@@ -74,16 +80,12 @@ export class Customer {
     if (response) this.validateDeleteCustomerResponseBody(response);
   }
 
-  getSettings() {
-    if (!this.settings) throw new Error('Customer failed: no settings');
-    return this.settings;
-  }
-
   async getLatest() {
     const token = await this.signInService.getToken();
     const response = await this.service.getById(this.getSettings()._id, token);
+    const customerData = _.omit(this.getSettings(), '_id', 'createdOn');
     this.validateGetCustomerResponseStatus(response);
-    this.validateGetCustomerResponseBody(response);
+    this.validateGetCustomerResponseBody(response, customerData);
   }
 
   async getAll() {
@@ -92,6 +94,18 @@ export class Customer {
     this.validateGetAllCustomersResponseStatus(response);
     this.validateGetAllCustomersResponseBody(response);
     this.validateAllCustomersSchema(response);
+  }
+
+  createFromExisting(customer: ICustomerFromResponse | undefined) {
+    if (!customer) {
+      this.setSettings(undefined);
+    }
+    this.setSettings(customer);
+  }
+
+  getSettings() {
+    if (!this.settings) throw new Error('Customer failed: no settings');
+    return this.settings;
   }
 
   getCustomerDataTransformedToDetails() {
@@ -110,11 +124,9 @@ export class Customer {
     };
   }
 
-  createFromExisting(customer: ICustomerFromResponse | undefined) {
-    if (!customer) {
-      this.setSettings(undefined);
-    }
-    this.setSettings(customer);
+  getCustomerInputSettings() {
+    if (!this.customerInputSettings) throw new Error('No customer input settings');
+    return this.customerInputSettings;
   }
 
   validateCreateCustomerResponseStatus(response: IResponse<ICustomerResponse>) {
@@ -183,9 +195,17 @@ export class Customer {
     );
   }
 
+  private setSettings(customerSettings: ICustomerFromResponse | undefined) {
+    this.settings = customerSettings;
+  }
+
+  private setCustomerInputSettings(customerInputs: ICustomer | undefined) {
+    this.customerInputSettings = customerInputs;
+  }
+
   private validateCreateCustomerResponseBody(
     response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
+    customerData: Partial<ICustomer>,
   ) {
     validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
       response,
@@ -198,7 +218,7 @@ export class Customer {
 
   private validateEditCustomerResponseBody(
     response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
+    customerData: Partial<ICustomer>,
   ) {
     validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
       response,
@@ -217,7 +237,7 @@ export class Customer {
 
   private validateGetCustomerResponseBody(
     response: IResponse<ICustomerResponse>,
-    customerData?: Partial<ICustomer>,
+    customerData: Partial<ICustomer>,
   ) {
     validateResponseBody<ICustomerResponse, Partial<ICustomer>>(
       response,
@@ -230,7 +250,7 @@ export class Customer {
 
   private validateGetAllCustomersResponseBody(
     response: IResponse<ICustomersResponse>,
-    customerData?: Partial<ICustomer>,
+    customerData?: Partial<ICustomer>[],
   ) {
     validateResponseBody<ICustomersResponse, Partial<ICustomer>>(
       response,
@@ -247,9 +267,5 @@ export class Customer {
 
   private validateAllCustomersSchema(response: IResponse<ICustomersResponse>) {
     validateSchema<ICustomersResponse>(response, allCustomersSchema);
-  }
-
-  private setSettings(customerSettings: ICustomerFromResponse | undefined) {
-    this.settings = customerSettings;
   }
 }
