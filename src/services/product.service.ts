@@ -35,7 +35,6 @@ export class Product {
     this.service = new ProductsApiClient();
   }
 
-  //TODO: добавить возможность работы с несколькими продуктами
   async create(customProductData?: Partial<IProduct>, expectError?: boolean) {
     const productData = customProductData ?? generateNewProduct(customProductData);
     this.setProductInputSettings(productData as IProduct);
@@ -67,7 +66,7 @@ export class Product {
   }
 
   async delete() {
-    if (!this.settings) return;
+    if (!this.settings) throw new Error('Failed to delete product: no settings');
     const token = await this.signInService.getToken();
     const response = await this.service.delete(this.getSettings()._id, token);
     this.validateDeleteProductResponseStatus(response);
@@ -77,7 +76,8 @@ export class Product {
 
   async deleteProducts(productIds: string[]) {
     const token = await this.signInService.getToken();
-    for (const id of productIds) {
+    const uniqueIds = [...new Set(productIds)];
+    for (const id of uniqueIds) {
       await this.service.delete(id, token);
     }
   }
@@ -113,7 +113,7 @@ export class Product {
   }
 
   getSettings() {
-    if (!this.settings) throw new Error('Product failed: no settings');
+    if (!this.settings) throw new Error('Failed to get product: no settings');
     return this.settings;
   }
 
@@ -130,7 +130,7 @@ export class Product {
   }
 
   getProductInputSettings() {
-    if (!this.productInputSettings) throw new Error('No product input settings');
+    if (!this.productInputSettings) throw new Error('Failed to get product inputs: no settings');
     return this.productInputSettings;
   }
 

@@ -6,18 +6,20 @@ import { Product } from '../services/product.service';
 import { SignInService } from '../services/signIn.service';
 import { CustomersPageService } from '../ui/services/customers.service';
 import { HomeService } from '../ui/services/home.service';
+import { OrdersPageService } from '../ui/services/orders.service';
 import { ProductsPageService } from '../ui/services/products.service';
 import { SignInPageService } from '../ui/services/signIn.service';
 import { checkMetadataIsSet, resetMetadataFlag } from '../utils/report/testMetadata';
 
 interface ISalesPortalServices {
-  customersPageService: CustomersPageService;
-  homePageService: HomeService;
   signInPageService: SignInPageService;
-  customer: Customer;
   signInService: SignInService;
-  product: Product;
+  homePageService: HomeService;
+  customersPageService: CustomersPageService;
   productsPageService: ProductsPageService;
+  ordersPageService: OrdersPageService;
+  customer: Customer;
+  product: Product;
   order: Order;
 }
 
@@ -52,6 +54,10 @@ export const test = base.extend<ISalesPortalServices>({
 
   order: async ({ signInService, customer, product }, use) => {
     await use(new Order(signInService, customer, product));
+  },
+
+  ordersPageService: async ({ page, order, customer, product }, use) => {
+    await use(new OrdersPageService(page, order, customer, product));
   },
 });
 

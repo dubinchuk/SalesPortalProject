@@ -35,7 +35,6 @@ export class Customer {
     this.service = new CustomerApiClient();
   }
 
-  //TODO: добавить возможность работы с несколькими кастомерами
   async create(customCustomerData?: Partial<ICustomer>, expectError?: boolean) {
     const customerData = customCustomerData ?? generateNewCustomer(customCustomerData);
     this.setCustomerInputSettings(customerData as ICustomer);
@@ -55,7 +54,6 @@ export class Customer {
     this.validateCreateCustomerSchema(response);
   }
 
-  //TODO: добавить проверку customerData
   async edit(_id?: string, newCustomerSettings?: ICustomer) {
     const customerId = _id ?? this.getSettings()._id;
     const newCustomer = newCustomerSettings ?? generateNewCustomer();
@@ -66,10 +64,11 @@ export class Customer {
     this.setSettings(response.body.Customer);
   }
 
-  async delete() {
-    if (!this.settings) return;
+  async delete(customerId?: string) {
+    if (!this.settings) throw new Error('Failed to delete customer: no settings');
     const token = await this.signInService.getToken();
-    const response = await this.service.delete(this.getSettings()._id, token);
+    const id = customerId ?? this.getSettings()._id;
+    const response = await this.service.delete(id, token);
     this.validateDeleteCustomerResponseStatus(response);
 
     return response;
@@ -104,7 +103,7 @@ export class Customer {
   }
 
   getSettings() {
-    if (!this.settings) throw new Error('Customer failed: no settings');
+    if (!this.settings) throw new Error('Failed to get customer: no settings');
     return this.settings;
   }
 
@@ -125,7 +124,7 @@ export class Customer {
   }
 
   getCustomerInputSettings() {
-    if (!this.customerInputSettings) throw new Error('No customer input settings');
+    if (!this.customerInputSettings) throw new Error('Failed to get customer inputs: no settings');
     return this.customerInputSettings;
   }
 

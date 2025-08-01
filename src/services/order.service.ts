@@ -80,8 +80,9 @@ export class Order {
     return products.reduce((acc, product) => acc + product.price, 0);
   }
 
-  async createAndValidate(productQuantity: number, expectError?: boolean) {
-    const response = await this.create(productQuantity, expectError);
+  async createAndValidate(productQuantity?: number, expectError?: boolean) {
+    const quantity = productQuantity ?? generateNumberOfProductsInOrder();
+    const response = await this.create(quantity, expectError);
 
     const expectedResponseBody: Partial<IOrderFromResponse> = {
       status: ORDER_STATUSES.DRAFT,
@@ -111,7 +112,7 @@ export class Order {
   }
 
   async delete() {
-    if (!this.settings) return;
+    if (!this.settings) throw new Error('Failed to delete order: no settings');
     const token = await this.signInService.getToken();
     const response = await this.service.delete(this.getSettings()._id, token);
 
@@ -126,17 +127,17 @@ export class Order {
   }
 
   getSettings() {
-    if (!this.settings) throw new Error('Order failed: no settings');
+    if (!this.settings) throw new Error('Failed to get order: no settings');
     return this.settings;
   }
 
   getProductsSettings() {
-    if (!this.productsSettings) throw new Error('No products settings found');
+    if (!this.productsSettings) throw new Error('Failed to get products: no settings');
     return this.productsSettings;
   }
 
   getCustomerSettings() {
-    if (!this.customerSettings) throw new Error('No customer settings found');
+    if (!this.customerSettings) throw new Error('Failed to get customer: no settings');
     return this.customerSettings;
   }
 
