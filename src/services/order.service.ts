@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 
 import { Customer } from './customer.service';
 import { Product } from './product.service';
@@ -10,7 +11,6 @@ import { ErrorResponseCause, IResponse, STATUS_CODES } from '../data/types/api.t
 import { ICustomerFromResponse } from '../data/types/customers.types';
 import {
   IOrderFromResponse,
-  IOrderHistoryFromResponse,
   IOrderResponse,
   IProductInOrder,
   ORDER_ACTIONS,
@@ -103,7 +103,7 @@ export class Order {
           action: ORDER_ACTIONS.ORDER_CREATED,
           performer: JSON.parse(PERFORMER_ADMIN),
         },
-      ] as IOrderHistoryFromResponse[],
+      ],
     };
 
     const cleanResponse = omitChangedOnFields(response);
@@ -139,6 +139,56 @@ export class Order {
   getCustomerSettings() {
     if (!this.customerSettings) throw new Error('Failed to get customer: no settings');
     return this.customerSettings;
+  }
+
+  getOrderTransformedToDetailsInTable() {
+    const settings = this.getSettings();
+
+    return {
+      orderNumber: settings._id,
+      email: settings.customer.email,
+      price: this.calculateTotalPrice(settings.products),
+      delivery: settings.delivery ? moment(settings.delivery?.finalDate).format('YYYY/MM/DD') : '-',
+      status: settings.status,
+      assignedManager: settings.assignedManager ?? '-',
+      createdOn: moment(settings.createdOn).format('YYYY/MM/DD HH:mm:ss'),
+    };
+  }
+
+  getOrderTransformedToDetails() {
+    const settings = this.getSettings();
+
+    return {
+      _id: settings._id,
+      assignedManager: settings.assignedManager ?? 'Click to select manager',
+      status: settings.status,
+      total_price: `$${settings.total_price}`,
+      finalDate: settings.delivery ? settings.delivery.finalDate : '-',
+      createdOn: moment(settings.createdOn).format('LLL'),
+    };
+  }
+
+  getDeliveryTransformedToDetails() {
+    const settings = this.getSettings();
+
+    return {
+      country: settings.delivery ? settings.delivery.address.country : '-',
+      city: settings.delivery ? settings.delivery.address.city : '-',
+      street: settings.delivery ? settings.delivery.address.street : '-',
+      house: settings.delivery ? settings.delivery.address.house : '-',
+      flat: settings.delivery ? settings.delivery.address.flat : '-',
+      condition: settings.delivery ? settings.delivery.condition : '-',
+      finalDate: settings.delivery ? settings.delivery.finalDate : '-',
+    };
+  }
+
+  getProductsTransformedToDetails() {
+    const productsInOrder = this.getSettings().products;
+    return productsInOrder.map((productInOrder) => ({
+      ..._.omit(productInOrder, ['_id', 'amount']),
+      received: productInOrder.received ? 'Received' : 'Not Received',
+      price: `$${productInOrder.price}`,
+    }));
   }
 
   createFromExisting(order: IOrderFromResponse | undefined) {

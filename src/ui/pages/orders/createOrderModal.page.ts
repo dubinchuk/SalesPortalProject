@@ -34,6 +34,10 @@ export class CreateOrderModalPage extends ModalPage {
     await this.click(this['Delete Product button']);
   }
 
+  async waitForAddProductBottonToHide() {
+    await this.waitForElement(this['Add Product button'], 'hidden');
+  }
+
   async getTotalPrice() {
     await this.getText(this['Total Price value']);
   }

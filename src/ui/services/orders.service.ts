@@ -1,18 +1,19 @@
 import { expect, Page } from '@playwright/test';
-import _ from 'lodash';
 import moment from 'moment';
 
 import { SalesPortalPageService } from './salesPortal.service';
 import { apiConfig } from '../../config/apiConfig';
 import { TOAST_MESSAGES } from '../../data/messages/messages';
 import { generateNumberOfProductsInOrder } from '../../data/orders/generateOrderData';
+import { ICustomerFromResponse } from '../../data/types/customers.types';
 import { IOrder, IOrderFromResponse, IOrderResponse } from '../../data/types/order.types';
 import { Customer } from '../../services/customer.service';
 import { Order } from '../../services/order.service';
 import { Product } from '../../services/product.service';
 import { logStep } from '../../utils/report/decorator';
 import { ensureResponseBody } from '../../utils/validation/response';
-import { CreateOrderModalPage } from '../pages/orders/createOrderModalPage';
+import { CreateOrderModalPage } from '../pages/orders/createOrderModal.page';
+import { OrderDetailsPage } from '../pages/orders/orderDetails.page';
 import { OrdersListPage } from '../pages/orders/orders.page';
 
 export class OrdersPageService {
@@ -21,6 +22,7 @@ export class OrdersPageService {
   private readonly product: Product;
   private readonly ordersListPage: OrdersListPage;
   private readonly createOrderModalPage: CreateOrderModalPage;
+  private readonly orderDetailsPage: OrderDetailsPage;
   private readonly salesPortalService: SalesPortalPageService;
 
   constructor(page: Page, order: Order, customer: Customer, product: Product) {
@@ -30,6 +32,7 @@ export class OrdersPageService {
     this.ordersListPage = new OrdersListPage(page);
     this.createOrderModalPage = new CreateOrderModalPage(page);
     this.salesPortalService = new SalesPortalPageService(page);
+    this.orderDetailsPage = new OrderDetailsPage(page);
   }
 
   async createCustomerAndProductsForOrder() {
@@ -49,13 +52,15 @@ export class OrdersPageService {
   @logStep('Create Order')
   async create(orderData?: IOrder) {
     const order = orderData ?? (await this.createCustomerAndProductsForOrder());
-    await this.openCreateCustomerModal();
+    await this.openCreateOrderModal();
     await this.createOrderModalPage.selectCustomer(order.customer);
     for (let i = 0; i < order.products.length; i++) {
       await this.createOrderModalPage.selectProduct(order.products[i], i);
       if (order.products.length > 0 && i !== order.products.length - 1) {
         await this.createOrderModalPage.clickOnAddProduct();
       }
+      if (i === order.products.length - 1)
+        this.createOrderModalPage.waitForAddProductBottonToHide();
     }
     const responseUrl = apiConfig.baseUrl + apiConfig.endpoints.Orders;
     const response = await this.createOrderModalPage.interceptResponse<IOrderResponse>(
@@ -82,18 +87,64 @@ export class OrdersPageService {
     await this.order.deleteWithCustomerAndProducts();
   }
 
-  @logStep('Open Create Customer Modal')
-  async openCreateCustomerModal() {
+  @logStep('Open Create Order Modal')
+  async openCreateOrderModal() {
     await this.ordersListPage.clickOnCreateOrderButton();
     await this.createOrderModalPage.waitForOpened();
   }
 
-  @logStep('Confirm customer creation')
+  @logStep('Open Order details')
+  async openOrderDetails(orderNumber?: string) {
+    const order = orderNumber ?? this.order.getSettings()._id;
+    await this.ordersListPage.clickOnDetails(order);
+    await this.orderDetailsPage.waitForOpened();
+    await this.orderDetailsPage.waitForOverlaySpinnersToHide();
+  }
+
+  @logStep('Confirm Order creation')
   async save() {
     await this.createOrderModalPage.clickOnCreate();
   }
 
-  @logStep('Validate product created message')
+  @logStep('Validate Order in table')
+  async validateOrderInTable() {
+    const expectedOrder = this.order.getOrderTransformedToDetailsInTable();
+
+    const actualOrder = await this.ordersListPage.getOrderByOrderNumber(expectedOrder.orderNumber);
+    expect(actualOrder).toEqual(expectedOrder);
+  }
+
+  @logStep('Validate Order Details')
+  async validateOrderDetails() {
+    const expectedOrder = this.order.getOrderTransformedToDetails();
+    const actualOrder = await this.orderDetailsPage.getOrderDetails();
+    expect(actualOrder).toEqual(expectedOrder);
+  }
+
+  @logStep('Validate Customer Details')
+  async validateCustomerDetails() {
+    const expectedCustomer = this.customer.getCustomerDataTransformedToDetails();
+    const actualCustomer = await this.orderDetailsPage.getCustomerDetails();
+    expect(actualCustomer).toEqual(expectedCustomer);
+  }
+
+  @logStep('Validate Delivery information')
+  async validateDeliveryInformation() {
+    const expectedDelivery = this.order.getDeliveryTransformedToDetails();
+    await this.orderDetailsPage.clickOnDeliveryTab();
+    const actualDelivery = await this.orderDetailsPage.getDeliveryInformation();
+    expect(actualDelivery).toEqual(expectedDelivery);
+  }
+
+  @logStep('Validate Requested Products')
+  async validateRequestedProducts() {
+    const productNames = this.order.getSettings().products.map((product) => product.name);
+    const expectedProducts = this.order.getProductsTransformedToDetails();
+    const actualproducts = await this.getRequestedProducts(productNames);
+    expect(actualproducts).toEqual(expectedProducts);
+  }
+
+  @logStep('Validate Order created message')
   private async validateOrderCreatedMessage() {
     await this.salesPortalService.validateToastMessageAndClose(
       this.ordersListPage,
@@ -101,21 +152,15 @@ export class OrdersPageService {
     );
   }
 
-  @logStep('Validate order in table')
-  async validateOrderInTable(orderData?: IOrderFromResponse) {
-    const order = orderData ?? this.order.getSettings();
-    const cleanOrder = {
-      orderNumber: order._id,
-      email: order.customer.email,
-      price: this.order.calculateTotalPrice(order.products),
-      delivery: order.delivery ?? '-',
-      status: order.status,
-      assignedManager: order.assignedManager ?? '-',
-      createdOn: order.createdOn,
-    };
+  private async getRequestedProducts(productNames: string[]) {
+    const products = [];
 
-    cleanOrder.createdOn = moment(cleanOrder.createdOn).format('YYYY/MM/DD HH:mm:ss');
-    const actualOrder = await this.ordersListPage.getOrderByOrderNumber(cleanOrder.orderNumber);
-    expect(actualOrder).toEqual(cleanOrder);
+    for (const productName of productNames) {
+      await this.orderDetailsPage.clickOnAccordionRequestedProducts(productName);
+      const product = await this.orderDetailsPage.getRequestedProduct(productName);
+      products.push(product);
+    }
+
+    return products;
   }
 }

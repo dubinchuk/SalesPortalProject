@@ -64,7 +64,7 @@ export interface IOrderHistoryFromResponse {
   products: IProductInOrder[];
   total_price: number;
   delivery: IOrderDeliveryFromResponse | null;
-  changeOn: string;
+  changeOn?: string;
   action: ORDER_ACTIONS;
   performer: IOrderPerformerFromResponse;
   assignedManager: string | null;
