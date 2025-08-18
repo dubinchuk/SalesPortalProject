@@ -11,8 +11,10 @@ test.describe('[UI] [Products] Delete Modal', async function () {
     await productsPageService.openDeleteProduct();
   });
 
-  test.afterEach(async function ({ product }) {
-    await product.delete();
+  test.afterEach(async function ({ product }, testInfo) {
+    if (testInfo.title !== 'Delete with Modal exit') {
+      await product.delete();
+    }
   });
 
   test('Close Modal on Close cross button click', async function ({ productsPageService }) {

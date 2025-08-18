@@ -4,3 +4,4 @@ export const ADMIN_PASSWORD = `${process.env.ADMIN_PASSWORD}`;
 export const TESTS = `${process.env.TESTS}`;
 export const SLACK_NOTIFICATION_URL = `${process.env.SLACK_NOTIFICATION_URL}`;
 export const ENVIRONMENT = `${process.env.ENVIRONMENT}`;
+export const PERFORMER_ADMIN = `${process.env.PERFORMER_ADMIN}`;

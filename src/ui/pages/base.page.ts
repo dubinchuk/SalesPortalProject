@@ -6,7 +6,7 @@ import { logAction } from '../../utils/report/decorator';
 
 const DEFAULT_TIMEOUT = 15000;
 
-type LocatorOrSelector = Locator | string;
+export type LocatorOrSelector = Locator | string;
 
 function isSelector(elementOrSelector: LocatorOrSelector): elementOrSelector is string {
   return typeof elementOrSelector === 'string';
@@ -17,6 +17,10 @@ export class BasePage {
 
   protected findElement(locator: LocatorOrSelector) {
     return isSelector(locator) ? this.page.locator(locator) : locator;
+  }
+
+  protected async findElements(locator: LocatorOrSelector): Promise<Locator[]> {
+    return await this.findElement(locator).all();
   }
 
   protected async waitForElement(
@@ -31,6 +35,16 @@ export class BasePage {
     } catch (error) {
       throw new Error(`Failed waiting for element "${locator}" (state: ${state}): ${error}`);
     }
+  }
+
+  protected async waitForElements(
+    locator: LocatorOrSelector,
+    timeout = DEFAULT_TIMEOUT,
+  ): Promise<Locator[]> {
+    const pageLocator = this.findElement(locator);
+    await pageLocator.first().waitFor({ state: 'visible', timeout });
+
+    return await this.findElements(locator);
   }
 
   protected async waitForElementAndScroll(locator: LocatorOrSelector, timeout = DEFAULT_TIMEOUT) {

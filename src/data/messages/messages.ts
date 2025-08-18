@@ -10,4 +10,7 @@ export const TOAST_MESSAGES = {
     DELETED: 'Product was successfully deleted',
     UPDATED: 'Product was successfully updated',
   },
+  ORDER: {
+    CREATED: 'Order was successfully created',
+  },
 };
