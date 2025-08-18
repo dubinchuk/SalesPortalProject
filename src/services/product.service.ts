@@ -103,6 +103,7 @@ export class Product {
     this.validateGetAllProductsResponseStatus(response);
     this.validateGetAllProductsResponseBody(response);
     this.validateAllProductsSchema(response);
+    return response;
   }
 
   createFromExisting(product: IProductFromResponse | undefined) {

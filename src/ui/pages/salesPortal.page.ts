@@ -1,9 +1,9 @@
-import { BasePage } from './base.page';
+import { BasePage, LocatorOrSelector } from './base.page';
 import { BASE_URL } from '../../config/environment';
 import { logStep } from '../../utils/report/decorator';
 
 export abstract class SalesPortalPage extends BasePage {
-  abstract readonly uniqueElement: string;
+  abstract readonly uniqueElement: LocatorOrSelector;
   private readonly 'Toast message' = this.findElement('.toast-body');
   private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');

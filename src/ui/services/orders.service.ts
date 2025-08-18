@@ -5,8 +5,12 @@ import { SalesPortalPageService } from './salesPortal.service';
 import { apiConfig } from '../../config/apiConfig';
 import { TOAST_MESSAGES } from '../../data/messages/messages';
 import { generateNumberOfProductsInOrder } from '../../data/orders/generateOrderData';
-import { ICustomerFromResponse } from '../../data/types/customers.types';
-import { IOrder, IOrderFromResponse, IOrderResponse } from '../../data/types/order.types';
+import {
+  IOrder,
+  IOrderHistoryInDetails,
+  IOrderResponse,
+  ORDER_ACTIONS,
+} from '../../data/types/order.types';
 import { Customer } from '../../services/customer.service';
 import { Order } from '../../services/order.service';
 import { Product } from '../../services/product.service';
@@ -150,6 +154,188 @@ export class OrdersPageService {
       this.ordersListPage,
       TOAST_MESSAGES.ORDER.CREATED,
     );
+  }
+
+  async validateOrderHistory(id?: string) {
+    const orderHistory = id
+      ? (await this.order.getById(id)).body.Order.history
+      : this.order.getSettings().history;
+    const orderHistoryReversed = [...orderHistory].reverse();
+    const actualOrderHistoryDetails = await this.orderDetailsPage.getOrderHistory();
+    const actualOrderHistoryDetailsReversed = [...actualOrderHistoryDetails].reverse();
+    const orderCreatedHistoryInDetails: IOrderHistoryInDetails[] = [];
+
+    for (let i = 0; i < orderHistoryReversed.length; i++) {
+      const updated = orderHistoryReversed[i];
+      const previous = i === 0 ? undefined : orderHistoryReversed[i - 1];
+      const header = [
+        {
+          action: updated.action,
+          performer: `${updated.performer.firstName} ${updated.performer.lastName}`,
+          changedOn: moment(updated.changedOn).format('YYYY/MM/DD HH:mm:ss') ?? '',
+        },
+      ];
+
+      switch (updated.action) {
+        case ORDER_ACTIONS.ORDER_CREATED:
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [{ reference: 'Status', previous: '-', updated: 'Draft' }],
+          });
+          break;
+
+        case ORDER_ACTIONS.ALL_PRODUCTS_RECEIVED:
+          if (!previous) break;
+          let receivedAll = [];
+          for (let i = 0; i < previous.products.length; i++) {
+            receivedAll.push({
+              reference: previous.products[i].name,
+              previous: previous.products[i].received ? 'Received' : 'Not received',
+              updated: 'Received',
+            });
+          }
+          orderCreatedHistoryInDetails.push({ header, items: receivedAll });
+          break;
+
+        case ORDER_ACTIONS.CUSTOMER_CHANGED:
+          if (!previous) break;
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [
+              {
+                reference: 'Customer',
+                previous: (await this.customer.getById(previous.customer)).body.Customer.name,
+                updated: (await this.customer.getById(updated.customer)).body.Customer.name,
+              },
+            ],
+          });
+          break;
+
+        case ORDER_ACTIONS.DELIVERY_EDITED:
+        case ORDER_ACTIONS.DELIVERY_SCHEDULED:
+          if (!previous) break;
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [
+              {
+                reference: 'Delivery Type',
+                previous: previous.delivery ? previous.delivery.condition : '-',
+                updated: updated.delivery ? updated.delivery.condition : '-',
+              },
+              {
+                reference: 'Delivery Date',
+                previous: previous.delivery
+                  ? moment(previous.delivery.finalDate).format('YYYY/MM/DD')
+                  : '-',
+                updated: updated.delivery
+                  ? moment(updated.delivery.finalDate).format('YYYY/MM/DD')
+                  : '-',
+              },
+              {
+                reference: 'Country',
+                previous: previous.delivery ? previous.delivery.address.country : '-',
+                updated: updated.delivery ? updated.delivery.address.country : '-',
+              },
+              {
+                reference: 'City',
+                previous: previous.delivery ? previous.delivery.address.city : '-',
+                updated: updated.delivery ? updated.delivery.address.city : '-',
+              },
+              {
+                reference: 'Street',
+                previous: previous.delivery ? previous.delivery.address.street : '-',
+                updated: updated.delivery ? updated.delivery.address.street : '-',
+              },
+              {
+                reference: 'House',
+                previous: previous.delivery ? previous.delivery.address.house.toString() : '-',
+                updated: updated.delivery ? updated.delivery.address.house.toString() : '-',
+              },
+              {
+                reference: 'Flat',
+                previous: previous.delivery ? previous.delivery.address.flat.toString() : '-',
+                updated: updated.delivery ? updated.delivery.address.flat.toString() : '-',
+              },
+            ],
+          });
+          break;
+
+        case ORDER_ACTIONS.MANAGER_ASSIGNED:
+        case ORDER_ACTIONS.MANAGER_UNASSIGNED:
+          if (!previous) break;
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [
+              {
+                reference: 'Assigned Manager',
+                previous: previous.assignedManager
+                  ? `${previous.assignedManager.firstName} ${previous.assignedManager.lastName}`
+                  : 'Not assigned',
+                updated: updated.assignedManager
+                  ? `${updated.assignedManager.firstName} ${updated.assignedManager.lastName}`
+                  : 'Not assigned',
+              },
+            ],
+          });
+          break;
+
+        case ORDER_ACTIONS.ORDER_CANCELED:
+        case ORDER_ACTIONS.ORDER_REOPENED:
+          if (!previous) break;
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [
+              {
+                reference: 'Status',
+                previous: previous.status,
+                updated: updated.status,
+              },
+            ],
+          });
+          break;
+
+        case ORDER_ACTIONS.ORDER_PROCESSING_STARTED:
+          if (!previous) break;
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: [{ reference: 'Status', previous: 'Draft', updated: 'In Process' }],
+          });
+          break;
+
+        case ORDER_ACTIONS.RECEIVED:
+          if (!previous) break;
+          let received = [];
+          for (let i = 0; i < previous.products.length; i++) {
+            received.push({
+              reference: previous.products[i].name,
+              previous: previous.products[i].received ? 'Received' : 'Not received',
+              updated: updated.products[i].received ? 'Received' : 'Not received',
+            });
+          }
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: received,
+          });
+          break;
+
+        case ORDER_ACTIONS.REQUESTED_PRODUCTS_CHANGED:
+          if (!previous) break;
+          let requested = [];
+          for (let i = 0; i < previous.products.length; i++) {
+            requested.push({
+              reference: `Product ${i + 1}`,
+              previous: previous.products[i].name,
+              updated: updated.products[i].name,
+            });
+          }
+          orderCreatedHistoryInDetails.push({
+            header,
+            items: requested,
+          });
+          break;
+      }
+    }
+    expect(actualOrderHistoryDetailsReversed).toEqual(orderCreatedHistoryInDetails);
   }
 
   private async getRequestedProducts(productNames: string[]) {

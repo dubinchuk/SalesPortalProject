@@ -85,6 +85,14 @@ export class Customer {
     const customerData = _.omit(this.getSettings(), '_id', 'createdOn');
     this.validateGetCustomerResponseStatus(response);
     this.validateGetCustomerResponseBody(response, customerData);
+    return response;
+  }
+
+  async getById(_id: string) {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getById(_id, token);
+    this.validateGetCustomerResponseStatus(response);
+    return response;
   }
 
   async getAll() {
@@ -93,6 +101,7 @@ export class Customer {
     this.validateGetAllCustomersResponseStatus(response);
     this.validateGetAllCustomersResponseBody(response);
     this.validateAllCustomersSchema(response);
+    return response;
   }
 
   createFromExisting(customer: ICustomerFromResponse | undefined) {

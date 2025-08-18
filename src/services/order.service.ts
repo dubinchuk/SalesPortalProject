@@ -84,7 +84,7 @@ export class Order {
     const quantity = productQuantity ?? generateNumberOfProductsInOrder();
     const response = await this.create(quantity, expectError);
 
-    const expectedResponseBody: Partial<IOrderFromResponse> = {
+    const expectedResponseBody: DeepPartial<IOrderFromResponse> = {
       status: ORDER_STATUSES.DRAFT,
       customer: this.getCustomerSettings(),
       products: this.transformProductsToOrder(this.getProductsSettings()),
@@ -124,6 +124,12 @@ export class Order {
     await this.customer.delete();
     const products = this.getSettings().products.map((product) => product._id);
     await this.product.deleteProducts(products);
+  }
+
+  async getById(id: string) {
+    const token = await this.signInService.getToken();
+    const response = await this.service.getById(id, token);
+    return response;
   }
 
   getSettings() {
@@ -214,9 +220,9 @@ export class Order {
 
   private validateCreateOrderResponseBody(
     response: IResponse<IOrderResponse>,
-    orderData: Partial<IOrderFromResponse>,
+    orderData: DeepPartial<IOrderFromResponse>,
   ) {
-    validateResponseBody<IOrderResponse, Partial<IOrderFromResponse>>(
+    validateResponseBody<IOrderResponse, DeepPartial<IOrderFromResponse>>(
       response,
       true,
       null,

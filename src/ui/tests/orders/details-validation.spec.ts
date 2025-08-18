@@ -34,4 +34,9 @@ test.describe('[UI] [Orders] Validate Details', async function () {
     setMetadata(Severity.NORMAL);
     await ordersPageService.validateDeliveryInformation();
   });
+
+  test('Validate new Order History', async function ({ ordersPageService }) {
+    setMetadata(Severity.NORMAL);
+    await ordersPageService.validateOrderHistory();
+  });
 });

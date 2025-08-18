@@ -23,8 +23,11 @@ export enum ORDER_ACTIONS {
   DELIVERY_SCHEDULED = 'Delivery Scheduled',
   DELIVERY_EDITED = 'Delivery Edited',
   RECEIVED = 'Received',
-  RECEIVED_ALL = 'Received All',
   ORDER_CANCELED = 'Order canceled',
+  ORDER_REOPENED = 'Order reopened',
+  MANAGER_ASSIGNED = 'Manager Assigned',
+  MANAGER_UNASSIGNED = 'Manager Unassigned',
+  ALL_PRODUCTS_RECEIVED = 'All products received',
 }
 
 export interface IOrder {
@@ -53,6 +56,15 @@ export interface IOrderPerformerFromResponse {
   createdOn: string;
 }
 
+export interface IOrderManagerFromResponse {
+  _id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  roles: string[];
+  createdOn: string;
+}
+
 export interface IProductInOrder extends IProduct {
   _id: string;
   received: boolean;
@@ -64,10 +76,10 @@ export interface IOrderHistoryFromResponse {
   products: IProductInOrder[];
   total_price: number;
   delivery: IOrderDeliveryFromResponse | null;
-  changeOn?: string;
+  changedOn: string;
   action: ORDER_ACTIONS;
   performer: IOrderPerformerFromResponse;
-  assignedManager: string | null;
+  assignedManager: IOrderManagerFromResponse | null;
 }
 
 export interface IOrderCommentFromResponse {
@@ -104,4 +116,9 @@ export interface IOrdersResponse extends IResponseFields {
     sortField: string;
     sortOrder: 'asc' | 'desc';
   };
+}
+
+export interface IOrderHistoryInDetails {
+  header: { action: ORDER_ACTIONS; performer: string; changedOn: string }[];
+  items: { reference: string; previous: string; updated: string }[];
 }
