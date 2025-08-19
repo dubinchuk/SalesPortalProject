@@ -12,7 +12,7 @@ const test = mergeTests(mockTest, servicesTest);
 
 test.describe('[UI] [Customers]', async function () {
   test.beforeEach(async function ({ homePageService }) {
-    await homePageService.openHomePage();
+    await homePageService.openHomePageByUrl();
   });
 
   test('Check empty customers table', async function ({

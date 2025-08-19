@@ -1,7 +1,9 @@
+import { urls } from '../../../config/routes';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class OrderDetailsPage extends SalesPortalPage {
   uniqueElement = this.page.getByRole('heading', { name: 'Order Details' });
+  pageUrl = urls.pages['Order Details'];
 
   // Order Details module
   private readonly 'Order number' = this.page.getByText('Order number:').locator('~ span');

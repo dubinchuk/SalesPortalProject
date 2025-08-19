@@ -1,9 +1,11 @@
 import { SalesPortalPage } from './salesPortal.page';
+import { urls } from '../../config/routes';
 import { CONTAINERS } from '../../data/types/home.types';
 import { logStep } from '../../utils/report/decorator';
 
 export class HomePage extends SalesPortalPage {
   uniqueElement = '//h1[.="Welcome to Sales Management Portal"]';
+  pageUrl = urls.pages.Home;
 
   private readonly 'Orders button' = this.findElement('#orders-from-home');
   private readonly 'Products button' = this.findElement('#products-from-home');

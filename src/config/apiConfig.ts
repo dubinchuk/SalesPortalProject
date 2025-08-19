@@ -1,20 +1,22 @@
+import { API_URL } from './environment';
+
 export const apiConfig = {
-  baseUrl: 'https://aqa-course-project.app',
+  baseUrl: API_URL,
   endpoints: {
-    ['Login']: '/api/login',
-    ['Customers']: '/api/customers',
-    ['Get Customer By Id']: (id: string) => `/api/customers/${id}/`,
-    ['Get All Customers']: `/api/customers/all`,
-    ['Products']: '/api/products',
-    ['Get Product By Id']: (id: string) => `/api/products/${id}/`,
-    ['Get All Products']: `/api/products/all`,
-    ['Orders']: '/api/orders',
-    ['Get Order By Id']: (id: string) => `/api/orders/${id}/`,
-    ['Get All Orders']: `/api/orders/all`,
-    ['Order Delivery']: '/api/orders/delivery',
-    ['Order Receive']: '/api/orders/receive',
-    ['Order Status']: '/api/orders/status',
-    ['Order Comments']: '/api/orders/comments',
+    ['Login']: 'api/login',
+    ['Customers']: 'api/customers',
+    ['Get Customer By Id']: (id: string) => `api/customers/${id}/`,
+    ['Get All Customers']: `api/customers/all`,
+    ['Products']: 'api/products',
+    ['Get Product By Id']: (id: string) => `api/products/${id}/`,
+    ['Get All Products']: `api/products/all`,
+    ['Orders']: 'api/orders',
+    ['Get Order By Id']: (id: string) => `api/orders/${id}/`,
+    ['Get All Orders']: `api/orders/all`,
+    ['Order Delivery']: 'api/orders/delivery',
+    ['Order Receive']: 'api/orders/receive',
+    ['Order Status']: 'api/orders/status',
+    ['Order Comments']: 'api/orders/comments',
   },
 };
 

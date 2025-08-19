@@ -138,6 +138,14 @@ export class BasePage {
     await this.page.goto(url);
   }
 
+  protected async waitForUrl(url: string, timeout = DEFAULT_TIMEOUT) {
+    try {
+      await this.page.waitForURL(url, { timeout });
+    } catch (error) {
+      throw new Error(`Failed to open URL ${url}: ${error}`);
+    }
+  }
+
   async interceptResponse<T>(
     url: string,
     triggerAction: () => Promise<void>,

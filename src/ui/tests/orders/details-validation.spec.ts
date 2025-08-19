@@ -4,11 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Orders] Validate Details', async function () {
-  test.beforeEach(async function ({ homePageService, ordersPageService, order }) {
+  test.beforeEach(async function ({ ordersPageService, order }) {
     await order.create();
-    await homePageService.openHomePage();
-    await homePageService.openOrdersPage();
-    await ordersPageService.openOrderDetails();
+    await ordersPageService.openOrderDetailsPageByUrl();
   });
 
   test.afterEach(async function ({ ordersPageService }) {

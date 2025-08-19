@@ -111,6 +111,18 @@ export class ProductsPageService {
     await this.addNewProductPage.clickOnSaveNewProductButton();
   }
 
+  @logStep('Open Products List Page by URL')
+  async openProductsListPageByUrl() {
+    await this.productsListPage.openPageByUrl();
+    await this.productsListPage.waitForOpened();
+  }
+
+  @logStep('Open Add New Product List Page by URL')
+  async openAddNewProductPageByUrl() {
+    await this.addNewProductPage.openPageByUrl();
+    await this.addNewProductPage.waitForOpened();
+  }
+
   @logStep('Open Add New Product Page')
   async openAddNewProductPage() {
     await this.productsListPage.clickOnAddNewProductButton();
@@ -131,11 +143,18 @@ export class ProductsPageService {
     await this.productDetailsModalPage.waitForOpened();
   }
 
+  @logStep('Open Edit Product Page by URL')
+  async openEditProductPageByUrl(productId?: string) {
+    const id = productId ?? this.product.getSettings()._id;
+    await this.editProductPage.openPageByUrl(id);
+    await this.editProductPage.waitForOpened(id);
+  }
+
   @logStep('Open Edit from Details Modal')
   async openEditFromDetails() {
     await this.productDetailsModalPage.clickOnEditProduct();
     await this.productDetailsModalPage.waitForModalToClose();
-    await this.editProductPage.waitForOpened();
+    await this.editProductPage.waitForOpened(this.product.getSettings()._id);
   }
 
   @logStep('Open Edit from Products List')
@@ -143,7 +162,7 @@ export class ProductsPageService {
     const name = productName ?? this.product.getSettings().name;
     await this.productsListPage.clickOnEditProduct(name);
     await this.editProductPage.waitForOverlaySpinnersToHide();
-    await this.editProductPage.waitForOpened();
+    await this.editProductPage.waitForOpened(this.product.getSettings()._id);
   }
 
   @logStep('Cancel Delete Modal')

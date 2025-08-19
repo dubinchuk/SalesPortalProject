@@ -1,7 +1,9 @@
 import { ProductFormPage } from './productForm.page';
+import { urls } from '../../../config/routes';
 
 export class EditProductPage extends ProductFormPage {
   uniqueElement = '#edit-product-form';
+  pageUrl = urls.pages['Edit Product'];
 
   private readonly 'Edit Product form' = this.findElement('#edit-product-form');
   private readonly 'Save Changes button' = this.findElement('#save-product-changes');

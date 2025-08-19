@@ -39,8 +39,8 @@ export class HomeService {
   }
 
   @logStep('Open Home Page')
-  async openHomePage() {
-    await this.homePage.goToBasePage();
+  async openHomePageByUrl() {
+    await this.homePage.openPageByUrl();
     await this.homePage.waitForOpened();
   }
 }

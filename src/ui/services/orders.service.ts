@@ -91,17 +91,30 @@ export class OrdersPageService {
     await this.order.deleteWithCustomerAndProducts();
   }
 
+  @logStep('Open Orders List Page by URL')
+  async openOrdersListPageByUrl() {
+    await this.ordersListPage.openPageByUrl();
+    await this.ordersListPage.waitForOpened();
+  }
+
   @logStep('Open Create Order Modal')
   async openCreateOrderModal() {
     await this.ordersListPage.clickOnCreateOrderButton();
     await this.createOrderModalPage.waitForOpened();
   }
 
+  @logStep('Open Order Details Page by URL')
+  async openOrderDetailsPageByUrl(orderId?: string) {
+    const id = orderId ?? this.order.getSettings()._id;
+    await this.orderDetailsPage.openPageByUrl(id);
+    await this.orderDetailsPage.waitForOpened(id);
+  }
+
   @logStep('Open Order details')
   async openOrderDetails(orderNumber?: string) {
     const order = orderNumber ?? this.order.getSettings()._id;
     await this.ordersListPage.clickOnDetails(order);
-    await this.orderDetailsPage.waitForOpened();
+    await this.orderDetailsPage.waitForOpened(order);
     await this.orderDetailsPage.waitForOverlaySpinnersToHide();
   }
 

@@ -1,8 +1,11 @@
 import { CustomerFormPage } from './customerForm.page';
+import { urls } from '../../../config/routes';
 import { logStep } from '../../../utils/report/decorator';
 
 export class AddNewCustomerPage extends CustomerFormPage {
   readonly uniqueElement = '//h2[.="Add New Customer "]';
+  pageUrl = urls.pages['Add Customer'];
+
   readonly 'Add New Customer form' = this.findElement('#add-new-customer-form');
   private readonly 'Save New Customer button' = this.findElement('#save-new-customer');
 

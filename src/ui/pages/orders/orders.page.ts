@@ -1,7 +1,9 @@
+import { urls } from '../../../config/routes';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class OrdersListPage extends SalesPortalPage {
   uniqueElement = '//h2[text()="Orders List "]';
+  pageUrl = urls.pages['Orders List'];
 
   private readonly 'Create Order button': string = 'button.page-title-header';
   private readonly 'Table row selector' = (orderNumber: string) =>

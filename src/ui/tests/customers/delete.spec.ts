@@ -4,10 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Customers] Delete', async function () {
-  test.beforeEach(async function ({ customer, homePageService }) {
+  test.beforeEach(async function ({ customer, customersPageService }) {
     await customer.create();
-    await homePageService.openHomePage();
-    await homePageService.openCustomersPage();
+    await customersPageService.openCustomersListPageByUrl();
   });
 
   test('Delete Customer from Customers List @smoke', async function ({ customersPageService }) {

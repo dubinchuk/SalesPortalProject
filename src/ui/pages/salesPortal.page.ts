@@ -1,9 +1,11 @@
 import { BasePage, LocatorOrSelector } from './base.page';
-import { BASE_URL } from '../../config/environment';
+import { urls } from '../../config/routes';
 import { logStep } from '../../utils/report/decorator';
 
 export abstract class SalesPortalPage extends BasePage {
   abstract readonly uniqueElement: LocatorOrSelector;
+  readonly pageUrl?: string | ((id: string) => string);
+
   private readonly 'Toast message' = this.findElement('.toast-body');
   private readonly 'Close toast button' = this.findElement('//button[@title="Close"]');
   private readonly 'Button Spinner' = this.findElement('button .spinner-border');
@@ -18,13 +20,25 @@ export abstract class SalesPortalPage extends BasePage {
     await this.click(this.headerMenuElement(moduleName));
   }
 
-  @logStep('Open Base URL')
-  async goToBasePage() {
-    await this.openPage(BASE_URL);
+  async openPageByUrl(id?: string) {
+    if (this.pageUrl) {
+      const url =
+        typeof this.pageUrl === 'string'
+          ? urls.baseUrl + this.pageUrl
+          : urls.baseUrl + this.pageUrl(id!);
+      await this.openPage(url);
+    }
   }
 
-  @logStep('Wait for unique page element')
-  async waitForOpened() {
+  @logStep('Wait page for opened')
+  async waitForOpened(id?: string) {
+    if (this.pageUrl) {
+      const url =
+        typeof this.pageUrl === 'string'
+          ? urls.baseUrl + this.pageUrl
+          : urls.baseUrl + this.pageUrl(id!);
+      await this.waitForUrl(url);
+    }
     await this.waitForElement(this.uniqueElement);
   }
 

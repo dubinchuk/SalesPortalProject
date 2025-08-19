@@ -16,7 +16,7 @@ export class SignInPageService {
 
   @logStep('Open Sales Portal')
   async openSalesPortal() {
-    await this.signInPage.goToBasePage();
+    await this.signInPage.openPageByUrl();
     await this.signInPage.waitForOpened();
   }
 

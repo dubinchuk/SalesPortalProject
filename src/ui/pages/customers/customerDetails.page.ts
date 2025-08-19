@@ -1,7 +1,10 @@
+import { urls } from '../../../config/routes';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class CustomerDetailsPage extends SalesPortalPage {
   uniqueElement = '//h3[.="Customer Details"]';
+  pageUrl = urls.pages['Customer Details'];
+
   private readonly 'Edit Customer pencil button' = this.findElement('#edit-customer-pencil');
   private readonly 'Back to Customers list' = this.findElement('.back-link');
   private readonly 'Email value' = this.findElement('#customer-email');

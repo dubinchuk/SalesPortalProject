@@ -125,6 +125,18 @@ export class CustomersPageService {
     await this.addNewCustomerPage.clickOnSaveNewCustomerButton();
   }
 
+  @logStep('Open Customer List Page by URL')
+  async openCustomersListPageByUrl() {
+    await this.customersListPage.openPageByUrl();
+    await this.customersListPage.waitForOpened();
+  }
+
+  @logStep('Open Add New Customer Page by URL')
+  async openAddNewCustomerPageByUrl() {
+    await this.addNewCustomerPage.openPageByUrl();
+    await this.addNewCustomerPage.waitForOpened();
+  }
+
   @logStep('Open Add New Customer Page')
   async openAddNewCustomerPage() {
     await this.customersListPage.clickOnAddNewCustomer();
@@ -141,23 +153,32 @@ export class CustomersPageService {
   @logStep('Open Details Modal')
   async openCustomerDetails(customerEmail?: string) {
     const email = customerEmail ?? this.customer.getSettings().email;
+    const id = this.customer.getSettings()._id;
     await this.customersListPage.clickOnCustomerDetails(email);
-    await this.customerDetailsPage.waitForOpened();
+    await this.customerDetailsPage.waitForOpened(id);
+  }
+
+  @logStep('Open Edit Customer Page by URL')
+  async openEditCustomerPageByUrl(customerId?: string) {
+    const id = customerId ? customerId : this.customer.getSettings()._id;
+    await this.editCustomerPage.openPageByUrl(id);
+    await this.editCustomerPage.waitForOpened(id);
   }
 
   @logStep('Open Edit Customer from Customers list')
   async openEditCustomer(customerEmail?: string) {
     const email = customerEmail ?? this.customer.getSettings().email;
+    const id = this.customer.getSettings()._id;
     await this.customersListPage.clickOnEditCustomer(email);
     await this.editCustomerPage.waitForOverlaySpinnersToHide();
-    await this.editCustomerPage.waitForOpened();
+    await this.editCustomerPage.waitForOpened(id);
   }
 
   @logStep('Open Edit from Details')
   async openEditFromDetails() {
     await this.customerDetailsPage.clickOnEditCustomer();
     await this.editCustomerPage.waitForOverlaySpinnersToHide();
-    await this.editCustomerPage.waitForOpened();
+    await this.editCustomerPage.waitForOpened(this.customer.getSettings()._id);
   }
 
   @logStep('Go back from Details')

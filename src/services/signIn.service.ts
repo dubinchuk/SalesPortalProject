@@ -65,12 +65,6 @@ export class SignInService {
     return await this.signInAPI({ username: ADMIN_USERNAME, password: ADMIN_PASSWORD });
   }
 
-  @logStep('Open Sales Portal')
-  async openSalesPortal() {
-    await this.signInPage.goToBasePage();
-    await this.signInPage.waitForOpened();
-  }
-
   transformToken() {
     return `Bearer ${this.token}`;
   }

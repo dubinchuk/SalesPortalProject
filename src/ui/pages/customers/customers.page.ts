@@ -1,8 +1,10 @@
+import { urls } from '../../../config/routes';
 import { CUSTOMERS_COLUMN_NAME } from '../../../data/types/customers.types';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class CustomersListPage extends SalesPortalPage {
   uniqueElement = '//h2[text()="Customers List "]';
+  pageUrl = urls.pages['Customers List'];
 
   readonly 'Empty table message' = 'td.fs-italic';
   private readonly 'Add New Customer button' = this.findElement('a.page-title-header');

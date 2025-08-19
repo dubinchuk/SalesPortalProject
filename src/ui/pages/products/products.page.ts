@@ -1,7 +1,9 @@
+import { urls } from '../../../config/routes';
 import { SalesPortalPage } from '../salesPortal.page';
 
 export class ProductsListPage extends SalesPortalPage {
   uniqueElement = '//h2[text()="Products List "]';
+  pageUrl = urls.pages['Products List'];
 
   readonly 'Add new product button': string = "//a[contains(text(),'+ Add Product')]";
   readonly 'Table row selector' = (productName: string) => `//tr[./td[text()="${productName}"]]`;

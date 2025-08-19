@@ -4,10 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Customers] Details', async function () {
-  test.beforeEach(async function ({ customer, homePageService }) {
+  test.beforeEach(async function ({ customer, customersPageService }) {
     await customer.create();
-    await homePageService.openHomePage();
-    await homePageService.openCustomersPage();
+    await customersPageService.openCustomersListPageByUrl();
   });
 
   test.afterEach(async function ({ customer }) {

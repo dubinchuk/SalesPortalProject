@@ -1,4 +1,5 @@
 import { SalesPortalPage } from './salesPortal.page';
+import { urls } from '../../config/routes';
 import { logStep } from '../../utils/report/decorator';
 import { PASSWORD_INPUT_SELECTOR } from '../../utils/security/sensitiveData';
 
@@ -6,6 +7,7 @@ import type { IUserCredentials } from '../../data/types/user.types';
 
 export class SignInPage extends SalesPortalPage {
   uniqueElement = '//form[.//input[@id="emailinput"]]';
+  pageUrl = urls.pages.Login;
 
   readonly 'Email input' = this.findElement('#emailinput');
   readonly 'Password input' = PASSWORD_INPUT_SELECTOR;

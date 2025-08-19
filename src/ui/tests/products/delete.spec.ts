@@ -4,10 +4,9 @@ import { test } from '../../../fixtures/services.fixtures';
 import { setMetadata } from '../../../utils/report/testMetadata';
 
 test.describe('[UI] [Products] Delete', async function () {
-  test.beforeEach(async function ({ product, homePageService }) {
+  test.beforeEach(async function ({ product, productsPageService }) {
     await product.create();
-    await homePageService.openHomePage();
-    await homePageService.openProductsPage();
+    await productsPageService.openProductsListPageByUrl();
   });
 
   test('Delete Product from Products List @smoke', async function ({ productsPageService }) {
